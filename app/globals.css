@@ -1,26 +1,119 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+
+  --color-background: #02040a;
+  --color-foreground: #f8fafc;
+  
+  --color-neon-red: #ff003c;
+  --color-neon-blue: #00f2ff;
+  --color-neon-purple: #7000ff;
+  
+  --color-card: rgba(255, 255, 255, 0.05);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-primary: #ff003c;
+  
+  --radius-2xl: 1rem;
+  --radius-3xl: 2rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --color-popover: #05070a;
+  --color-popover-foreground: #f8fafc;
+  --color-muted: #0f172a;
+  --color-muted-foreground: #64748b;
+  --color-accent: #ff003c;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #f8fafc;
+  --color-ring: #ff003c;
+  --color-input: rgba(255, 255, 255, 0.05);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  body::selection {
+    background-color: rgba(255, 0, 60, 0.3);
+  }
+
+  * {
+    border-color: var(--color-border);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .glass {
+    background-color: var(--color-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border);
+  }
+
+  .glass-heavy {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .neon-glow-red {
+    box-shadow: 0 0 15px rgba(255, 0, 60, 0.3), 0 0 30px rgba(255, 0, 60, 0.1);
+  }
+  
+  .neon-glow-blue {
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.3), 0 0 30px rgba(0, 242, 255, 0.1);
+  }
+
+  .text-gradient {
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(to right, var(--color-neon-red), var(--color-neon-blue));
+  }
+  
+  .hover-neon-red {
+    transition: all 300ms;
+  }
+  .hover-neon-red:hover {
+    box-shadow: 0 0 20px rgba(255, 0, 60, 0.4);
+    border-color: rgba(255, 0, 60, 0.5);
+  }
+
+  .hover-neon-blue {
+    transition: all 300ms;
+  }
+  .hover-neon-blue:hover {
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+    border-color: rgba(0, 242, 255, 0.5);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #1e293b;
+  border-radius: 9999px;
+  transition: background-color 200ms;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 0, 60, 1);
 }
