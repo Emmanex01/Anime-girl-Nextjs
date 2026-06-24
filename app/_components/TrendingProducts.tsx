@@ -3,6 +3,7 @@ import { ProductCard } from './ProductCard';
 import { motion } from 'motion/react';
 import { ChevronRight } from 'lucide-react';
 import { useShopStore } from '../store/useShopStore';
+import Link from 'next/link';
 
 export function TrendingProducts() {
   const { setCurrentRoute, setCategoryFilter, setSearchFilter, products } = useShopStore();
@@ -37,12 +38,12 @@ export function TrendingProducts() {
               🔥
             </motion.span>
           </div>
-          <button 
-            onClick={handleViewAll}
+          <Link
+            href="/products"
             className="flex items-center gap-1 text-[10px] font-black tracking-[0.2em] text-white/40 hover:text-white hover:text-neon-blue transition-colors uppercase italic cursor-pointer"
           >
             VIEW ALL <ChevronRight className="w-3 h-3 text-neon-blue" />
-          </button>
+          </Link>
         </div>
 
         <div className="relative">

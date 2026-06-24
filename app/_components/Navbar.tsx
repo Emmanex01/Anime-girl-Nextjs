@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useShopStore } from '../store/useShopStore';
 import { SearchDropdown } from './SearchDropdown';
+import Link from 'next/link';
 
 const navLinks = [
   { name: 'HOME' },
@@ -111,25 +112,28 @@ export function Navbar() {
         {/* Top Header */}
         <div className="flex items-center justify-between mb-4">
           {/* Logo */}
+          <Link href="/">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             onClick={() => handleNavLinkClick('HOME')}
             className="flex flex-col items-start cursor-pointer group"
           >
-            <div className="flex items-center">
-              <span className="font-display font-black text-2xl md:text-3xl tracking-tighter leading-none group-hover:text-neon-blue transition-colors">
-                OTAKU
-              </span>
-            </div>
-            <div className="flex items-center">
-              <span className="font-display font-black text-2xl md:text-3xl tracking-tighter text-neon-red leading-none group-hover:text-neon-red/80 transition-colors">
-                DISTRICT
-              </span>
-            </div>
-            <span className="text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase mt-1 leading-none">オタク地区</span>
+            
+              <div className="flex items-center">
+                <span className="font-display font-black text-2xl md:text-3xl tracking-tighter leading-none group-hover:text-neon-blue transition-colors">
+                  OTAKU
+                </span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-display font-black text-2xl md:text-3xl tracking-tighter text-neon-red leading-none group-hover:text-neon-red/80 transition-colors">
+                  DISTRICT
+                </span>
+              </div>
+              <span className="text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase mt-1 leading-none">オタク地区</span>
+            
           </motion.div>
-
+          </Link>
           {/* Search bar Desktop */}
           <div className="hidden lg:flex flex-1 max-w-2xl mx-12 relative z-50">
             <div className="relative w-full">

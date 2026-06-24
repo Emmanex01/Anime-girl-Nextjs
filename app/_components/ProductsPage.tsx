@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { ProductCard } from './ProductCard';
 import { useShopStore } from '../store/useShopStore';
+import Link from 'next/link';
 
 export function ProductsPage() {
   const { 
@@ -96,13 +97,13 @@ export function ProductsPage() {
         
         {/* Breadcrumb Navigation */}
         <div className="mb-8 flex items-center justify-between">
-          <button 
-            onClick={() => setCurrentRoute('home')}
+          <Link 
+            href="/"
             className="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] text-white/50 hover:text-white hover:text-neon-blue transition-colors uppercase italic cursor-pointer"
           >
             <CornerUpLeft className="w-4 h-4 text-neon-blue" />
             <span>RETURN TO GATEWAY</span>
-          </button>
+          </Link>
           
           <div className="text-[10px] font-mono text-white/30 tracking-widest uppercase">
             PATH: <span className="text-white/40">HOME</span> / <span className="text-neon-blue">PRODUCTS</span>

@@ -31,7 +31,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-background text-white selection:bg-neon-red/30">
         <Navbar/>
-        <div className="relative z-10">
+        <div className="relative z-10 pt-16 md:pt-24">
           {children}
           <Footer/>
         </div>

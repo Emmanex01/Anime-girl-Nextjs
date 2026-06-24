@@ -8,6 +8,7 @@ import {
 import { useShopStore } from '../store/useShopStore';
 import { products } from '../data';
 import { Product } from '../types';
+import Link from 'next/link';
 
 // Anime & Otaku details and reviews records
 const DEFAULT_REVIEWS: Record<string, { username: string; rating: number; date: string; comment: string; helpful: number }[]> = {
@@ -240,36 +241,31 @@ export function ProductDetailsContent({ product: selectedProduct }: ProductDetai
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-[#060810] z-[150] overflow-y-auto"
+        className="min-h-screen bg-[#060810] z-150 overflow-y-auto"
         ref={containerRef}
         id="product-details-immersion-page"
       >
         {/* Upper Brand Control Row */}
-        <div className="sticky top-0 bg-[#060810]/95 backdrop-blur-md border-b border-white/5 z-[160] flex items-center justify-between px-4 md:px-8 py-4">
-          <button 
-            onClick={() => setSelectedProduct(null)}
-            className="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] text-white/50 hover:text-[#00f2ff] transition-all uppercase italic"
+        <div className="pt-20 bg-[#060810]/95 backdrop-blur-md border-b border-white/5 z-160 flex items-center justify-between px-4 md:px-8 py-4">
+          <Link 
+            href="/products"
+            className="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] text-white/50 hover:text-neon-blue transition-all uppercase italic"
           >
             <ArrowLeft className="w-4 h-4" />
             BACK TO DECK
-          </button>
+          </Link>
           
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono tracking-widest text-neon-blue font-black uppercase">
-              DECK CONTROL // 0{selectedProduct.id}
-            </span>
-          </div>
 
-          <button 
-            onClick={() => setSelectedProduct(null)}
+          <Link 
+            href="/products"
             className="w-10 h-10 rounded-sm border border-white/5 hover:border-white/20 transition-all flex items-center justify-center text-white/50 hover:text-white"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Link>
         </div>
 
         {/* Primary Page Workspace Content */}
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-8 pb-32">
+        <div className="max-w-350 mx-auto px-4 md:px-8 py-8 pb-32">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
             
             {/* COLUMN 1: Galleried Media System (lg:col-span-7) */}
