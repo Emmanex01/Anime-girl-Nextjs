@@ -1,8 +1,7 @@
-import { Tags } from "lucide-react"
-import { menu, shopifyMenuOperation, ShopifyProduct, GetProductsResponse, GetProductResponse } from "./types";
+import { menu, shopifyMenuOperation, ShopifyProduct, Product, ShopifyProductOperation, Connection, Image } from "./types";
 import { getMenuQuery } from "./queries/menu";
-import { productsQuery, productQuery } from "./queries/products";
-import { TAGS } from "../constants";
+import { productsQuery } from "./queries/products";
+import { HIDDEN_PRODUCT_TAG, TAGS } from "../constants";
 import { ensureStartWith } from "../utils";
 import { isShopifyError } from "../type-guards";
 
@@ -97,51 +96,81 @@ export async function getMenu(handle: string): Promise<menu[]> {
   )
 }
 
+// function removeEdgesAndNodes<T>(array: Connection<T>): T[] {
+//   return array.edges.map((edge) => edge?.node);
+// }
+
+function removeEdgesAndNodes<T>(array?: Connection<T> | null): T[] {
+  console.log("removeEdgesAndNodes:", JSON.stringify(array, null, 2));
+
+  if (!array?.edges) {
+    throw new Error("Connection has no edges");
+  }
+
+  return array.edges.map((edge) => edge.node);
+}
+
+function reshapeImages(images: Connection<Image>, productTitle: string) {
+  const flattened = removeEdgesAndNodes(images);
+  return flattened.map((image) => {
+    const filename = image.url.match(/.*\/(.*)\..*/)?.[1];
+
+    return {
+      ...image,
+      altText: image.altText || `${productTitle} ${filename},`
+    }
+  });
+}
+
+function reshapeProduct(product: ShopifyProduct, filterHiddenProducts: boolean = true) {
+  if ( !product || (filterHiddenProducts && product.tags.includes(HIDDEN_PRODUCT_TAG))) {
+    return null;
+  }
+  const { images, variants, ...rest } = product;
+  return {
+    ...rest,
+    images: reshapeImages(images, product.title),
+    variants: removeEdgesAndNodes(variants),
+  };
+}
+function reshapeProducts(products: ShopifyProduct[]) { 
+  const reshapedProducts = [];
+
+  for (const product of products) {
+    if (product) {
+      const reshapedProduct = reshapeProduct(product);
+
+      if (reshapedProduct) {
+        reshapedProducts.push(reshapedProduct);
+      }
+    }
+  }
+  return reshapedProducts;
+}
+
 /**
  * Fetch all products from Shopify
  * @param query - Optional search query to filter products
  * @returns Array of ShopifyProduct objects
  */
-export async function getProducts(query?: string): Promise<ShopifyProduct[]> {
-  try {
-    const res = await shopifyFetch<GetProductsResponse>({
+export async function getProducts({ 
+  sortKey, 
+  reverse, 
+  query 
+}: { 
+  sortKey?: string; 
+  reverse?: boolean; 
+  query?: string 
+}): Promise<Product[]> {
+    const res = await shopifyFetch<ShopifyProductOperation>({
       query: productsQuery,
       tags: [TAGS.products],
       variables: {
-        first: 100,
-        ...(query && { query }),
+        query,
+        reverse,
+        sortKey,
       },
     });
 
-    return (
-      res.body?.data?.products?.edges?.map((edge: { node: ShopifyProduct }) => ({
-        ...edge.node,
-      })) || []
-    );
-  } catch (error) {
-    console.error("❌ Error fetching products from Shopify:", error);
-    return [];
-  }
+    return reshapeProducts(removeEdgesAndNodes(res.body.data.products))
 }
-
-/**
- * Fetch a single product by handle
- * @param handle - The product handle (slug)
- * @returns ShopifyProduct object or null if not found
- */
-export async function getProductByHandle(handle: string): Promise<ShopifyProduct | null> {
-  try {
-    const res = await shopifyFetch<GetProductResponse>({
-      query: productQuery,
-      tags: [TAGS.products],
-      variables: {
-        handle,
-      },
-    });
-
-    return res.body?.data?.productByHandle || null;
-  } catch (error) {
-    console.error(`❌ Error fetching product ${handle}:`, error);
-    return null;
-  }
-};

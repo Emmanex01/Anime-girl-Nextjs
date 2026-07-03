@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx"
+import { ReadonlyURLSearchParams } from "next/navigation";
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -10,4 +11,10 @@ export function ensureStartWith(url: string, prefix: string): string {
     return url;
   }
   return `${prefix}${url}`;
+}
+
+export function createUrl(path: string, params: URLSearchParams | ReadonlyURLSearchParams): string {
+  const paramsString = params.toString();
+  const queryString = paramsString ? `?${paramsString}` : '';
+  return `${path}${queryString}`;
 }
