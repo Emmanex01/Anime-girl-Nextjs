@@ -1,4 +1,4 @@
-import { ProductCard } from '@/app/_components/ProductCard'
+import ProductCardComponent from '../../_components/ProductCardComponent'
 import { defaultSort, sortOption } from '@/lib/constants'
 import { getProducts } from '@/lib/shopify'
 import React from 'react'
@@ -22,7 +22,7 @@ const SearchPage = async ({ searchParams }: searchProps) => {
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
         {products.map((product) => (
           <div key={product.id} className='col-span-1'>
-            <p className='text-lg font-semibold mb-2'>{product.title}</p>
+            <ProductCardComponent product={product} />
           </div>
         ))}
       </div>

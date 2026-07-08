@@ -6,7 +6,7 @@ export const TAGS = {
 
 export const SHOPIFY_GRAPHQL_API_ENDPOINT = "/api/2026-04/graphql.json";
 
-type SortFilterItem = {
+export type SortFilterItem = {
   title: string,
   slug: string,
   sortKey: 'BEST_SELLING' | 'CREATED_AT' | 'PRICE' | 'RELEVANCE',

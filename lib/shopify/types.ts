@@ -140,3 +140,21 @@ export type ShopifyProductOperation = {
     sortKey?: string;
   };
 }
+
+export type ShopifyCollection = {
+  handle: string;
+  title: string;
+  description: string;
+  seo: SEO;
+  updatedAt: string;
+}
+
+export type Collection = ShopifyCollection & {
+  path: string;
+}
+
+export type ShopifyCollectionOperation = {
+  data: {
+    collections: Connection<ShopifyCollection>;
+  };
+}

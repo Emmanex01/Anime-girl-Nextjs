@@ -1,9 +1,10 @@
-import { menu, shopifyMenuOperation, ShopifyProduct, Product, ShopifyProductOperation, Connection, Image } from "./types";
+import { menu, shopifyMenuOperation, ShopifyProduct, Product, ShopifyProductOperation, Connection, Image, ShopifyCollectionOperation, Collection, ShopifyCollection } from "./types";
 import { getMenuQuery } from "./queries/menu";
 import { productsQuery } from "./queries/products";
 import { HIDDEN_PRODUCT_TAG, TAGS } from "../constants";
 import { ensureStartWith } from "../utils";
 import { isShopifyError } from "../type-guards";
+import { getCollectionsQuery } from "./queries/collection";
 
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN
@@ -173,4 +174,53 @@ export async function getProducts({
     });
 
     return reshapeProducts(removeEdgesAndNodes(res.body.data.products))
+}
+
+const reshapeCollection = (collection: ShopifyCollection): Collection | undefined => {
+  if (!collection) {
+    return undefined;
+  }
+  return {
+    ...collection,
+    path: `/collections/${collection.handle}`
+  };
+}
+
+const reshapeCollections = (collections: ShopifyCollection[]) => {
+  const reshapedCollections = [];
+
+  for (const collection of collections) {
+    if (collection) {
+      const reshapedCollection = reshapeCollection(collection);
+      if (reshapedCollection) {
+        reshapedCollections.push(reshapedCollection);
+      }
+    }
+  }
+  return reshapedCollections;
+}
+
+export async function getCollections(): Promise<Collection[]> {
+  const res = await shopifyFetch<ShopifyCollectionOperation>({
+    query: getCollectionsQuery,
+    tags: [TAGS.collections],
+  });
+
+  const shopifyCollections = removeEdgesAndNodes(res?.body?.data?.collections);
+  const collections = [
+    {
+      handle: " ",
+      title: "All Products",
+      description: "All products in the store",
+      seo: {
+        title: "All",
+        description: "All products",
+      },
+      path: "/search",
+      updatedAt: new Date().toISOString(),
+      },
+      // filter out any collections that have the HIDDEN_PRODUCT_TAG in their tags
+      ...reshapeCollections(shopifyCollections).filter((collection) => !collection.handle?.startsWith('hidden')),
+  ]
+  return collections;
 }
