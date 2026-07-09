@@ -1,4 +1,7 @@
+'use client'
 import { SortFilterItem } from "@/lib/constants"
+import FilterItemComponent from "./FilterItemComponent";
+import FilterItemDropDown from "./Dropdown";
 
 export type PathFilterItem = { title: string, path: string };
 export type ListItem = SortFilterItem | PathFilterItem;
@@ -13,15 +16,6 @@ function FilterItemList ({ list }: { list: ListItem[] }) {
     )
 }
 
-function FilterItemDropDown ({ list }: { list: ListItem[] }) {
-    return (
-        <ul>
-            {list.map((item, index) => (
-                <FilterItemComponent key={index} item={item} />
-            ))}
-        </ul>
-    )
-}
 
 const FilterList = ({ 
     list, title

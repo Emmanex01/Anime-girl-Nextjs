@@ -30,14 +30,28 @@ function SortFilterItemComponent({ item }: { item: SortFilterItem }) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const active = searchParams.get('sort') === item.slug;
-    const q = searchParams.get('q') || '';
+    const q = searchParams.get('q');
 
     const href = createUrl(
         pathname, 
         new URLSearchParams({ 
-            sort: item.slug, 
-            q })
+            ...(q && {q}),
+            ...(item.slug && item.slug.length && {sort: item.slug})
+             })
     );
+    const DynamicTag = active ? 'p' : Link;
+
+    return ( 
+        <li>
+            <DynamicTag
+                prefetch={!active ? false : undefined}
+                href={href}
+                className={`block px-4 py-2 text-sm ${active ? 'font-bold' : ''}`}
+            >
+                {item.title}
+            </DynamicTag>
+        </li>
+    )
     }
 
 const FilterItemComponent = ({item}: { item: ListItem}) => {
