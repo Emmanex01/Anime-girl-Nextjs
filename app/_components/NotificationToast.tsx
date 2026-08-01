@@ -1,3 +1,4 @@
+'use client'
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, Info, X } from 'lucide-react';
 import { useShopStore } from '../store/useShopStore';

@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Trash2, Plus, Minus, ArrowRight, ShoppingBag, CheckCircle, MapPin, Truck, ShieldCheck, Mail } from 'lucide-react';
 import { useShopStore } from '../store/useShopStore';
 import { Order, OrderItem } from '../types';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useCart } from './cart/cart-context';
 
 export function CartDrawer() {
-  const { 
-    cart, 
+  const {  
     cartSubtotal, 
     isCartOpen, 
     setCartOpen, 
@@ -15,10 +17,18 @@ export function CartDrawer() {
     clearCart,
     shippingOptions,
     addOrder,
-    products,
     updateProduct,
-    setCurrentRoute
+    setCurrentRoute,
+    products
   } = useShopStore();
+
+  console.log({
+  cartSubtotal,
+  type: typeof cartSubtotal,
+  value: cartSubtotal
+});
+
+  const { cart } = useCart();
 
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [customerName, setCustomerName] = useState('');
@@ -31,72 +41,72 @@ export function CartDrawer() {
   const transactionFee = cartSubtotal > 0 ? 1200 : 0;
   const cartTotal = cartSubtotal + shippingCost + transactionFee;
 
-  const handleCreateOrder = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customerName.trim() || !customerEmail.trim()) return;
+  // const handleCreateOrder = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!customerName.trim() || !customerEmail.trim()) return;
 
-    // Create unique Order ID
-    const orderId = 'OD-' + Math.floor(1000 + Math.random() * 9000);
+  //   // Create unique Order ID
+  //   const orderId = 'OD-' + Math.floor(1000 + Math.random() * 9000);
 
-    // Map cart items to order items structure
-    const orderItems: OrderItem[] = cart.map(item => ({
-      id: item.product.id,
-      name: item.product.name,
-      price: item.product.price,
-      quantity: item.quantity,
-      size: item.size,
-      color: item.color,
-      image: item.product.image
-    }));
+  //   // Map cart items to order items structure
+  //   const orderItems: OrderItem[] = cart?.lines.map(item => ({
+  //     id: item.id,
+  //     name: item.merchandise.product.title,
+  //     price: item.cost.totalAmount.amount,
+  //     quantity: item.quantity,
+  //     size: item.merchandise.selectedOptions.find(opt => opt.name.toLowerCase() === 'size')?.value || null,
+  //     color: item.merchandise.selectedOptions.find(opt => opt.name.toLowerCase() === 'color')?.value || null,
+  //     image: item.merchandise.product.featuredImage
+  //   }));
 
     // Trigger Pre-order increment logic
-    cart.forEach(item => {
-      const dbProduct = products.find(p => p.id === item.product.id);
-      if (dbProduct && dbProduct.isPreorder) {
-        const currentCount = dbProduct.preorderCount || 0;
-        const limit = dbProduct.preorderLimit || 10;
-        const nextCount = currentCount + item.quantity;
+    // cart.forEach(item => {
+    //   const dbProduct = products.find(p => p.id === item.product.id);
+    //   if (dbProduct && dbProduct.isPreorder) {
+    //     const currentCount = dbProduct.preorderCount || 0;
+    //     const limit = dbProduct.preorderLimit || 10;
+    //     const nextCount = currentCount + item.quantity;
         
-        let shouldMarkSoldOut = false;
-        if (nextCount >= limit) {
-          shouldMarkSoldOut = true;
-        }
+    //     let shouldMarkSoldOut = false;
+    //     if (nextCount >= limit) {
+    //       shouldMarkSoldOut = true;
+    //     }
 
-        updateProduct(dbProduct.id, {
-          preorderCount: nextCount,
-          soldOut: shouldMarkSoldOut || dbProduct.soldOut,
-          enabled: !shouldMarkSoldOut
-        });
-      }
-    });
+    //     updateProduct(dbProduct.id, {
+    //       preorderCount: nextCount,
+    //       soldOut: shouldMarkSoldOut || dbProduct.soldOut,
+    //       enabled: !shouldMarkSoldOut
+    //     });
+    //   }
+    // });
 
     // Construct the new order in state DB (Order Status History seeded)
-    const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 16);
-    const newOrder: Order = {
-      id: orderId,
-      customerName,
-      customerEmail,
-      products: orderItems,
-      amountPaid: cartTotal,
-      shippingMethod: selectedShipping ? `${selectedShipping.name} (${selectedShipping.deliveryEstimate})` : 'Standard Shipping',
-      status: 'Order Received',
-      trackingNumber: 'OTK-TRK-' + Math.floor(10000 + Math.random() * 90000),
-      dateCreated: new Date().toISOString().split('T')[0],
-      statusHistory: [
-        {
-          id: 'sh-' + Math.random().toString(36).substring(2, 9),
-          status: 'Order Received',
-          timestamp,
-          updatedBy: 'System',
-          note: 'Customer completed checkout successfully.'
-        }
-      ]
-    };
+  //   const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 16);
+  //   const newOrder: Order = {
+  //     id: orderId,
+  //     customerName,
+  //     customerEmail,
+  //     products: orderItems,
+  //     amountPaid: cartTotal,
+  //     shippingMethod: selectedShipping ? `${selectedShipping.name} (${selectedShipping.deliveryEstimate})` : 'Standard Shipping',
+  //     status: 'Order Received',
+  //     trackingNumber: 'OTK-TRK-' + Math.floor(10000 + Math.random() * 90000),
+  //     dateCreated: new Date().toISOString().split('T')[0],
+  //     statusHistory: [
+  //       {
+  //         id: 'sh-' + Math.random().toString(36).substring(2, 9),
+  //         status: 'Order Received',
+  //         timestamp,
+  //         updatedBy: 'System',
+  //         note: 'Customer completed checkout successfully.'
+  //       }
+  //     ]
+  //   };
 
-    addOrder(newOrder);
-    setPlacedOrder(newOrder);
-    clearCart();
-  };
+  //   addOrder(newOrder);
+  //   setPlacedOrder(newOrder);
+  //   clearCart();
+  // };
 
   const handleClose = () => {
     setCartOpen(false);
@@ -109,12 +119,14 @@ export function CartDrawer() {
     }, 400);
   };
 
-  const handleGoToTracking = (orderId: string) => {
-    handleClose();
-    setCurrentRoute('track-order');
-    // Set cookie/hash or simply let them search it in track-order view
-    window.location.hash = `/track-order?id=${orderId}`;
-  };
+  // const handleGoToTracking = (orderId: string) => {
+  //   handleClose();
+  //   setCurrentRoute('track-order');
+  //   // Set cookie/hash or simply let them search it in track-order view
+  //   window.location.hash = `/track-order?id=${orderId}`;
+  // };
+
+  
 
   return (
     <AnimatePresence>
@@ -126,7 +138,7 @@ export function CartDrawer() {
             animate={{ opacity: 0.7 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200]"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-200"
             id="cart-overlay"
           />
 
@@ -148,7 +160,7 @@ export function CartDrawer() {
                  </h2>
                  {!placedOrder && !isCheckingOut && (
                    <span className="bg-white/5 text-[10px] font-mono px-2 py-0.5 border border-white/10 rounded-sm text-white/60">
-                     {cart.length} ITEMS
+                     {cart?.lines.length} ITEMS
                    </span>
                  )}
               </div>
@@ -202,7 +214,7 @@ export function CartDrawer() {
 
                   <div className="pt-4 flex flex-col gap-2 w-full">
                     <button
-                      onClick={() => handleGoToTracking(placedOrder.id)}
+                      // onClick={() => handleGoToTracking(placedOrder.id)}
                       className="w-full h-12 bg-neon-blue text-black font-black text-xs tracking-widest uppercase transition-transform hover:-translate-y-0.5 cursor-pointer"
                     >
                       LIVE TRACK ORDER
@@ -335,7 +347,7 @@ export function CartDrawer() {
               ) : (
                 /* Primary shopping cart items list */
                 <div className="space-y-4">
-                  {cart.length === 0 ? (
+                  {cart?.lines.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-center gap-4 py-20">
                       <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center opacity-40">
                          <ShoppingBag className="w-8 h-8 text-white" />
@@ -344,19 +356,23 @@ export function CartDrawer() {
                         <h3 className="font-display font-black text-sm uppercase tracking-wider text-white">YOUR BAG IS EMPTY</h3>
                         <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">REPLENISH YOUR VANGUARD STOCK</p>
                       </div>
-                      <button 
+                      <Link 
+                        href='/products'
                         onClick={handleClose}
                         className="mt-4 border border-neon-blue text-neon-blue hover:bg-neon-blue/10 rounded-sm px-6 py-2.5 text-[10px] uppercase font-black tracking-widest italic transition-all cursor-pointer"
                       >
                          CONTINUE SHOPPING
-                      </button>
+                      </Link>
                     </div>
                   ) : (
-                    cart.map((item) => {
-                      const itemKey = `${item.product.id}-${item.size || 'std'}-${item.color || 'std'}`;
+                    cart?.lines.map((item) => {
+                      const color = item.merchandise.selectedOptions.find(opt => opt.name.toLowerCase() === 'color')?.value || null;
+                      const size = item.merchandise.selectedOptions.find(opt => opt.name.toLowerCase() === 'size')?.value || null;
+                      const itemKey = `${item.id}-${size || 'std'}-${color || 'std'}`;
+                      const image = item.merchandise.product.featuredImage ?? item.merchandise.product.featuredImage?.[0] ?? null;
                       
                       // Preorder tags calculations
-                      const dbProduct = products.find(p => p.id === item.product.id);
+                      const dbProduct = products.find(p => p.id === item.id);
                       const isPre = dbProduct?.isPreorder;
                       const limit = dbProduct?.preorderLimit || 10;
                       const purchased = dbProduct?.preorderCount || 0;
@@ -370,12 +386,21 @@ export function CartDrawer() {
                         >
                           {/* Thumbnail */}
                           <div className="w-20 h-20 bg-slate-900 rounded-sm overflow-hidden flex-shrink-0 border border-white/5">
-                            <img 
-                              src={item.product.image} 
-                              alt={item.product.name} 
-                              className="w-full h-full object-cover" 
-                              referrerPolicy="no-referrer"
-                            />
+                            {image ? 
+                              <Image 
+                                src={image.url}
+                                alt={item.product.title}
+                                width={10}
+                                height={5}
+                                className="w-full h-full object-cover" 
+                                referrerPolicy="no-referrer"
+                              /> : (
+                                <div className="flex h-full items-center justify-center bg-zinc-200">
+                                  No Image
+                                </div>
+                              )
+                            }
+                            
                           </div>
 
                           {/* Meta & Info */}
@@ -383,10 +408,10 @@ export function CartDrawer() {
                             <div>
                               <div className="flex items-start justify-between gap-1">
                                 <h4 className="text-xs font-display font-bold uppercase text-white/90 tracking-tight leading-tight max-w-[180px]">
-                                  {item.product.name}
+                                  {item.merchandise.product.title}
                                 </h4>
                                 <button 
-                                  onClick={() => removeFromCart(item.product.id, item.size, item.color)}
+                                  onClick={() => removeFromCart(item.id, size, color)}
                                   className="text-white/30 hover:text-neon-red p-1 transition-colors cursor-pointer"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -394,19 +419,19 @@ export function CartDrawer() {
                               </div>
                               <div className="flex flex-wrap items-center gap-2 mt-1">
                                 <span className="text-[9px] uppercase tracking-widest text-[#00f2ff] font-bold">
-                                  {item.product.category}
+                                  {item.merchandise.title}
                                 </span>
-                                {(item.size || item.color) && (
+                                {(size || color) && (
                                   <span className="text-white/20 text-[9px] font-bold">|</span>
                                 )}
-                                {item.size && (
+                                {size && (
                                   <span className="bg-white/5 border border-white/10 text-[8px] font-mono px-1.5 py-0.5 rounded-sm text-neon-blue font-black tracking-widest">
-                                    {item.size}
+                                    {size}
                                   </span>
                                 )}
-                                {item.color && (
+                                {color && (
                                   <span className="bg-white/5 border border-white/10 text-[8px] font-mono px-1.5 py-0.5 rounded-sm text-neon-red font-black tracking-widest">
-                                    {item.color.toUpperCase()}
+                                    {color.toUpperCase()}
                                   </span>
                                 )}
                               </div>
@@ -424,7 +449,7 @@ export function CartDrawer() {
                               {/* Quantity controls */}
                               <div className="flex items-center gap-1 border border-white/5 bg-black/30 rounded-sm p-0.5">
                                 <button
-                                  onClick={() => updateCartQuantity(item.product.id, item.quantity - 1, item.size, item.color)}
+                                  onClick={() => updateCartQuantity(item.id, item.quantity - 1, size, color)}
                                   className="w-5 h-5 rounded-sm hover:bg-white/5 flex items-center justify-center text-white/50 hover:text-white cursor-pointer"
                                 >
                                   <Minus className="w-2.5 h-2.5" />
@@ -439,7 +464,7 @@ export function CartDrawer() {
                                       useShopStore.getState().showNotification(`Cannot exceed preorder slot remaining limit (${remaining}).`, 'info');
                                       return;
                                     }
-                                    updateCartQuantity(item.product.id, item.quantity + 1, item.size, item.color);
+                                    updateCartQuantity(item.id, item.quantity + 1, size, color);
                                   }}
                                   className="w-5 h-5 rounded-sm hover:bg-white/5 flex items-center justify-center text-white/50 hover:text-white cursor-pointer"
                                 >

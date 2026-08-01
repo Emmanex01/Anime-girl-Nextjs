@@ -5,23 +5,27 @@ import React, { useState } from 'react'
 import { SearchDropdown } from '../SearchDropdown';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createUrl } from '@/lib/utils';
+import { useShopifyProductSearch } from '@/lib/hooks/useShopifyProducts';
 
 const SearchComponent = () => {
  const [showDropdown, setShowDropdown] = useState(false);
  const searchParams = useSearchParams();
+ const [query, setQuery] = useState('');
  console.log('searchParams', searchParams?.get('q'))
-
+ const { shopifyProducts, isLoading} = useShopifyProductSearch({query}); // Fetch products based on query
+    console.log('shopifyProducts', shopifyProducts);
  const router = useRouter();
 
  const onSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const val = e.target as HTMLFormElement;
-    const search = val.search as HTMLInputElement;
-    const newParams = new URLSearchParams(searchParams.toString());
+    // const search = val.search as HTMLInputElement;
+    // const newParams = new URLSearchParams(searchParams.toString());
+    const newParams = new URLSearchParams(searchParams);
 
-    if (search.value) {
-        newParams.set('q', search.value)
+    if (query?.trim()) {
+        newParams.set('q', query.trim());
     } else {
         newParams.delete('q')
     }
@@ -38,8 +42,9 @@ const SearchComponent = () => {
         <div className="relative w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
             <Input 
-                value={searchParams?.get('q') || ''}
-                key={searchParams?.get('q') || ''}
+                value={query}
+                name="search"
+                onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setShowDropdown(true)}
                 onBlur={() => setTimeout(() => setShowDropdown(false), 200)} // short delay for click capture
                 placeholder="Search anime merch, figures, apparel..." 
@@ -56,9 +61,11 @@ const SearchComponent = () => {
 
             {/* Floating Live Search Dropdown */}
             <AnimatePresence>
-            {showDropdown && searchParams?.get('q')?.trim() && (
+            {showDropdown && query?.trim() && (
                 <SearchDropdown
-                query={searchParams?.get('q') || ''}
+                query={query}
+                products={shopifyProducts}
+                isSearching={isLoading}
                 onSelectResult={() => {
                     setShowDropdown(false);
                 }}

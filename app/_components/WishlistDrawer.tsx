@@ -1,3 +1,4 @@
+'use client'
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Heart, ShoppingCart, Trash2 } from 'lucide-react';
 import { useShopStore } from '../store/useShopStore';

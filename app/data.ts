@@ -1,61 +1,81 @@
 import { Product, Collection, CommunityPost } from './types';
 
-export const products: Product[] = [
+// src/data/initialProducts.ts
+
+export interface LegacyProductInput {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  rating: number;
+  reviewCount: number;
+  image: string;
+  label?: 'NEW' | 'TRENDING' | 'LIMITED' | 'SALE';
+  originalPrice?: number;
+  tags?: string[];
+  description?: string;
+}
+
+export const initialProductsData: LegacyProductInput[] = [
   {
     id: '1',
     name: 'Gojo Satoru Figure',
     category: 'Jujutsu Kaisen',
     price: 45000,
     rating: 4.9,
-    reviewCount: 120,
+    reviewCount: 42,
     image: 'https://images.unsplash.com/photo-1608889476561-6242afdbf622?q=80&w=1000&auto=format&fit=crop',
-    label: 'NEW',
-    tags: ['figure', 'toy', 'collectible', 'gojo', 'satoru', 'jujutsu kaisen', 'jjk', 'special grade'],
+    label: 'LIMITED',
+    tags: ['LIMITED', 'Figure', 'Jujutsu Kaisen', 'Preorder'],
+    description: 'Highly detailed 1/7 scale figure of Satoru Gojo activating his Domain Expansion: Infinite Void. Crafted with translucent material to replicate curse energy effects.'
   },
   {
     id: '2',
     name: 'Akatsuki Cloud Hoodie',
-    category: 'Naruto Shippuden',
+    category: 'Naruto',
     price: 28000,
-    rating: 4.8,
-    reviewCount: 98,
+    rating: 4.7,
+    reviewCount: 128,
     image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1000&auto=format&fit=crop',
     label: 'TRENDING',
-    tags: ['hoodie', 'apparel', 'clothing', 'streetwear', 'akatsuki', 'naruto', 'cloud', 'jacket'],
+    tags: ['TRENDING', 'Apparel', 'Hoodie', 'Naruto'],
+    description: 'Premium heavyweight cotton hoodie featuring the embroidered iconic red Akatsuki cloud. Styled for comfort and durable streetwear aesthetic.'
   },
   {
     id: '3',
-    name: 'Monkey D. Luffy Figure',
-    category: 'One Piece',
-    price: 42000,
-    rating: 4.9,
-    reviewCount: 201,
-    image: 'https://images.unsplash.com/photo-1613333151270-4f5bd191f692?q=80&w=1000&auto=format&fit=crop',
+    name: 'Demon Slayer Tanjiro Haori',
+    category: 'Demon Slayer',
+    price: 24000,
+    rating: 4.6,
+    reviewCount: 56,
+    image: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?q=80&w=1000&auto=format&fit=crop',
     label: 'NEW',
-    tags: ['figure', 'toy', 'collectible', 'luffy', 'one piece', 'pirate', 'straw hat'],
+    tags: ['NEW', 'Apparel', 'Haori', 'Demon Slayer'],
+    description: 'Authentic green-and-black checkered haori robe as worn by Tanjiro Kamado. Light, breathable, and suitable for both casual wear and conventions.'
   },
   {
     id: '4',
-    name: 'Uchiha Sneakers',
-    category: 'Naruto Shippuden',
-    price: 35000,
-    rating: 4.7,
-    reviewCount: 56,
-    image: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?q=80&w=1000&auto=format&fit=crop',
-    label: 'LIMITED',
-    tags: ['sneakers', 'shoes', 'footwear', 'apparel', 'streetwear', 'uchiha', 'naruto', 'sasuke', 'sharingan'],
+    name: 'Shinigami Notebook Replica',
+    category: 'Death Note',
+    price: 15000,
+    rating: 4.8,
+    reviewCount: 84,
+    image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1000&auto=format&fit=crop',
+    label: 'SALE',
+    originalPrice: 18000,
+    tags: ['SALE', 'Replica', 'Notebook', 'Death Note'],
+    description: 'High-quality leather-bound notebook replica with silver foil stamping, containing the rules of the Death Note on the inside cover.'
   },
   {
     id: '5',
-    name: 'Demon Slayer Backpack',
-    category: 'Kimetsu no Yaiba',
-    price: 22000,
-    rating: 4.8,
-    reviewCount: 76,
-    image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1000&auto=format&fit=crop',
-    label: 'SALE',
-    originalPrice: 30000,
-    tags: ['backpack', 'bag', 'accessories', 'school', 'demon slayer', 'kimetsu', 'tanjiro', 'nezuko'],
+    name: 'Lunar Rod Wand Replica',
+    category: 'Sailor Moon',
+    price: 32000,
+    rating: 4.5,
+    reviewCount: 31,
+    image: 'https://images.unsplash.com/photo-1594744803329-e58b31de215f?q=80&w=1000&auto=format&fit=crop',
+    tags: ['Replica', 'Prop', 'Sailor Moon'],
+    description: 'Replica prop wand from the timeless magical girl classic, featuring dynamic LED light integration and original sound effect chips.'
   },
   {
     id: '6',
@@ -63,77 +83,60 @@ export const products: Product[] = [
     category: 'One Piece',
     price: 65000,
     rating: 4.9,
-    reviewCount: 42,
+    reviewCount: 67,
     image: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000&auto=format&fit=crop',
     label: 'LIMITED',
-    tags: ['katana', 'sword', 'weapon', 'accessories', 'relic', 'metal', 'zoro', 'one piece', 'wano'],
+    tags: ['LIMITED', 'Replica', 'Swords', 'One Piece'],
+    description: 'A matching display set of Zoro’s signature three swords: Wado Ichimonji, Sandai Kitetsu, and Shusui. Comes with display stand and custom scabbards.'
   },
   {
     id: '7',
-    name: 'Sukuna Ryomen Finger Replica',
-    category: 'Jujutsu Kaisen',
-    price: 12000,
-    rating: 4.6,
-    reviewCount: 34,
-    image: 'https://images.unsplash.com/photo-1560942485-b2a11cc13456?q=80&w=1000&auto=format&fit=crop',
-    label: 'LIMITED',
-    tags: ['finger', 'replica', 'collectible', 'cursed', 'sukuna', 'ryomen', 'jujutsu kaisen', 'jjk'],
+    name: 'Hatsune Miku Nendoroid',
+    category: 'Vocaloid',
+    price: 18000,
+    rating: 4.8,
+    reviewCount: 94,
+    image: 'https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=1000&auto=format&fit=crop',
+    label: 'NEW',
+    tags: ['NEW', 'Figure', 'Nendoroid', 'Vocaloid'],
+    description: 'An adorable chibi-styled articulated figure of the cyber pop sensation Hatsune Miku, featuring multiple swappable faceplates, hand parts, and her trademark spring onion.'
   },
   {
     id: '8',
-    name: 'Nezuko Kamado Haori Coat',
-    category: 'Kimetsu no Yaiba',
-    price: 32000,
-    rating: 4.8,
-    reviewCount: 53,
-    image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1000&auto=format&fit=crop',
-    label: 'NEW',
-    tags: ['haori', 'kimono', 'apparel', 'coat', 'nezuko', 'kamado', 'demon slayer', 'cosplay'],
+    name: 'Survey Corps Green Cloak',
+    category: 'Attack on Titan',
+    price: 22000,
+    rating: 4.7,
+    reviewCount: 110,
+    image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=1000&auto=format&fit=crop',
+    label: 'SALE',
+    originalPrice: 25000,
+    tags: ['SALE', 'Apparel', 'Cloak', 'Attack on Titan'],
+    description: 'The green hooded cloak of the Scout Regiment featuring the highly detailed, high-density embroidered Wings of Freedom logo on the back.'
   },
   {
     id: '9',
     name: 'EVA-01 Test Type Mech Toy',
-    category: 'Evangelion',
+    category: 'Neon Genesis Evangelion',
     price: 78000,
     rating: 4.9,
-    reviewCount: 29,
+    reviewCount: 52,
     image: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?q=80&w=1000&auto=format&fit=crop',
     label: 'LIMITED',
-    tags: ['eva', 'evangelion', 'figure', 'mech', 'robot', 'collectible', 'shinji', 'tokyo-3'],
+    tags: ['LIMITED', 'Figure', 'Evangelion', 'Preorder'],
+    description: 'An ultra-posable action figure of Evangelion Unit-01. Packaged with optional progressive knives, pallet rifle, umbilical cable, and an interchangeable berserk-mode head.'
   },
   {
     id: '10',
     name: 'Cyberpunk Neo-Tokyo Bomber',
-    category: 'Techwear',
+    category: 'Cyberpunk',
     price: 48000,
-    rating: 4.7,
-    reviewCount: 41,
+    rating: 4.8,
+    reviewCount: 73,
     image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=1000&auto=format&fit=crop',
     label: 'TRENDING',
-    tags: ['cyberpunk', 'jacket', 'bomber', 'techwear', 'streetwear', 'apparel', 'tokyo', 'neon'],
-  },
-  {
-    id: '11',
-    name: 'Chainsaw Man Pochita Plush',
-    category: 'Chainsaw Man',
-    price: 15000,
-    rating: 4.9,
-    reviewCount: 156,
-    image: 'https://images.unsplash.com/photo-1559251606-c623743a6d76?q=80&w=1000&auto=format&fit=crop',
-    label: 'SALE',
-    originalPrice: 18500,
-    tags: ['plush', 'toy', 'doll', 'pochita', 'chainsaw man', 'cute', 'devil'],
-  },
-  {
-    id: '12',
-    name: 'Hollow Ichigo Mask Replica',
-    category: 'Bleach',
-    price: 25000,
-    rating: 4.8,
-    reviewCount: 64,
-    image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1000&auto=format&fit=crop',
-    label: 'NEW',
-    tags: ['mask', 'replica', 'collectible', 'ichigo', 'hollow', 'bleach', 'shinigami', 'cosplay'],
+    tags: ['TRENDING', 'Apparel', 'Jacket', 'Cyberpunk'],
+    description: 'Street-ready padded bomber jacket finished with Kanji detailing, neon reflective linings, and weatherproof zippers built for the Neo-Tokyo urban explorer.'
   }
 ];
 

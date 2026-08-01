@@ -9,11 +9,15 @@ import { SearchDropdown } from '../SearchDropdown';
 import { getMenu } from '@/lib/shopify';
 import { menu } from '@/lib/shopify/types';
 import Link from 'next/link';
+import { useShopifyProductSearch } from '@/lib/hooks/useShopifyProducts';
 
 const MobileMenu = ({ navLinks }: { navLinks: menu[] }) => {
-    const [mobileSearchVal, setMobileSearchVal] = useState('');
+    const [query, setQuery] = useState('');
     const [showMobileDropdown, setShowMobileDropdown] = useState(false);
     const [isLinkActive, setIsLinkActive] = useState<string>('Home');
+
+    console.log('query', query);
+    const { shopifyProducts, isLoading, error } = useShopifyProductSearch({query}); // Fetch products based on query
 
 
     const { 
@@ -69,28 +73,30 @@ const MobileMenu = ({ navLinks }: { navLinks: menu[] }) => {
                <div className="relative mb-6">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                  <Input 
-                   value={mobileSearchVal}
+                   value={query}
                    onChange={(e) => {
-                     setMobileSearchVal(e.target.value);
+                     setQuery(e.target.value);
                      setShowMobileDropdown(true);
                    }}
                    onFocus={() => setShowMobileDropdown(true)}
                    onBlur={() => setTimeout(() => setShowMobileDropdown(false), 200)}
-                   onKeyDown={(e) => handleKeyDown(e, mobileSearchVal)}
+                   onKeyDown={(e) => handleKeyDown(e, query)}
                    placeholder="Search..." 
                    className="pl-10 bg-white/5 border-white/10"
                  />
 
                  {/* Floating Live Search Dropdown Mobile */}
                  <AnimatePresence>
-                   {showMobileDropdown && mobileSearchVal.trim() && (
+                   {showMobileDropdown && query.trim() && (
                      <SearchDropdown 
-                       query={mobileSearchVal} 
+                       query={query }
+                       products={shopifyProducts}
+                       isSearching={isLoading} 
                        onSelectResult={() => {
                          setShowMobileDropdown(false);
                          setMobileMenuOpen(false);
                        }}
-                       onClearQuery={() => setMobileSearchVal('')}
+                       onClearQuery={() => setQuery('')}
                      />
                    )}
                  </AnimatePresence>

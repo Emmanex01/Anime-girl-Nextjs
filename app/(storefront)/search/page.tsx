@@ -15,6 +15,9 @@ const SearchPage = async ({ searchParams }: searchProps) => {
     const products = await getProducts({ sortKey, reverse, query:  searchValue });
     const resultsText = products.length > 1 ? 'results' : 'result';
     console.log('products', products)
+    console.log('search: ', searchValue);
+    console.log('sortKey: ', sortKey);
+    console.log('reverse: ', reverse);
   return (
     <div>
       <h1 className='text-2xl font-bold mb-4'>Search Results</h1>

@@ -3,11 +3,19 @@ import FilterList from "./filter/FilterList";
 import { Suspense } from "react";
 
 async function CollectionsList() {
-  const collections = await getCollections();
-  console.log('Collection start')
-  console.log('Collection List:', collections);
-  console.log('Collection passed')
-  return <FilterList list={collections} title="Collections" />
+  try {
+    console.log("Before getCollections");
+
+    const collections = await getCollections();
+
+    console.log("After getCollections");
+    console.log(collections);
+
+    return <FilterList list={collections} title="Collections" />;
+  } catch (err) {
+    console.error("getCollections failed:", err);
+    return <div>Failed to load collections.</div>;
+  }
 }
 
 const skeleton = 'mb-3 h-4 w-5/2 bg-gray-300 rounded animate-pulse';

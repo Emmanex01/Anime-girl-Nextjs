@@ -1,7 +1,70 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Product, Order, OrderItem, ShippingOption, AdminUser, AdminNotification, OrderStatusHistoryItem, CustomerProfile, CustomerAddress, CustomerNotification } from '../types';
-import { products as initialProductsData } from '../data';
+
+// ----------------------------------------------------------------------
+// 1. Unified Types: Shopify base extended with legacy compatibility
+// ----------------------------------------------------------------------
+
+import { 
+  Order, 
+  OrderItem, 
+  ShippingOption, 
+  AdminUser, 
+  AdminNotification, 
+  OrderStatusHistoryItem, 
+  CustomerProfile, 
+  CustomerAddress, 
+  CustomerNotification 
+} from '../types';
+
+import { 
+  ShopifyProduct, 
+  ProductVariant, 
+  Image 
+} from '@/lib/shopify/types';
+
+// Assuming your legacy product dummy data array is imported from your mock data file.
+// Adjust the import path as necessary for your local file structure.
+import { initialProductsData } from '@/app/data'; 
+
+/**
+ * Our unified Product type.
+ * It is a flattened Shopify Product combined with legacy mapped fields
+ * to keep UI files backwards-compatible while integrating Shopify.
+ */
+export interface Product extends Omit<ShopifyProduct, 'variants' | 'images'> {
+  variants: ProductVariant[];
+  images: Image[];
+
+  // --- Backwards-Compatibility Mapping Layer ---
+  name: string;           // Maps to Shopify `title`
+  image: string;          // Maps to Shopify `featuredImage.url`
+  price: number;          // Mapped as standard number from `priceRange.minVariantPrice.amount`
+  category: string;       // Mapped from first tag or productType
+
+  // --- Legacy UI & Metadata Fields ---
+  rating?: number;
+  reviewCount?: number;
+  label?: 'NEW' | 'TRENDING' | 'LIMITED' | 'SALE';
+  originalPrice?: number;
+  
+  // Inventory & Admin Fields
+  animeSeries?: string;
+  hide?: boolean;
+  soldOut?: boolean;
+  enabled?: boolean;
+  
+  // Admin-Only Fields
+  sourceStore?: string;
+  sourceUrl?: string;
+  purchasePriceJpy?: number;
+  productWeight?: number;
+
+  // Pre-order fields
+  isPreorder?: boolean;
+  preorderLimit?: number;
+  preorderCount?: number;
+}
 
 export interface CartItem {
   product: Product;
@@ -16,7 +79,7 @@ export interface NotificationState {
 }
 
 interface ShopState {
-  // Products list (Dynamic catalog)
+  // Products list (Dynamic catalog using our unified hybrid Product type)
   products: Product[];
   setProducts: (products: Product[]) => void;
   addProduct: (product: Product) => void;
@@ -59,7 +122,7 @@ interface ShopState {
   loginAdmin: (username: string, role: AdminUser['role'], name: string) => boolean;
   logoutAdmin: () => void;
 
-  // System Notifications Log (Fulfills Database Notifications requirement)
+  // System Notifications Log
   adminNotifications: AdminNotification[];
   addAdminNotification: (message: string, type: AdminNotification['type']) => void;
   markNotificationRead: (id: string) => void;
@@ -113,33 +176,128 @@ interface ShopState {
   setCategoryFilter: (category: string) => void;
 }
 
-// Initial default products populated with source files configuration
-const getInitialProducts = (): Product[] => {
-  return initialProductsData.map(p => ({
-    ...p,
-    description: p.description || `High-fidelity anime themed ${p.name}. Features precise coloring and detailing. Perfect for collectors and enthusiasts direct from Tokyo.`,
-    animeSeries: p.category,
-    enabled: true,
-    hide: false,
-    soldOut: false,
-    sourceStore: 'AmiAmi Akihabara',
-    sourceUrl: 'https://www.amiami.com/eng/detail/?gcode=FIGURE-' + p.id,
-    purchasePriceJpy: Math.floor(p.price * 0.17), // Approximate cost in Japanese Yen
-    productWeight: 450, // default weight in grams
-    isPreorder: p.label === 'LIMITED',
-    preorderLimit: p.label === 'LIMITED' ? 10 : undefined,
-    preorderCount: p.label === 'LIMITED' ? 4 : undefined
-  }));
+// ----------------------------------------------------------------------
+// 2. Data Transformation Utilities (Adapter Pattern)
+// ----------------------------------------------------------------------
+
+const flattenConnection = <T>(connection: { edges: Array<{ node: T }> } | undefined): T[] => {
+  return connection?.edges?.map((edge) => edge.node) || [];
 };
 
-// Seed initial values for shipping options
+/**
+ * Transforms legacy static mock products into the unified Product type.
+ */
+export const transformLegacyToProduct = (p: any): Product => {
+  const priceStr = String(p.price || '0');
+  const imageUrl = p.image || '';
+  return {
+    id: p.id,
+    handle: p.handle || p.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || `prod-${p.id}`,
+    availableForSale: !p.soldOut,
+    title: p.name || '',
+    description: p.description || `High-fidelity anime themed ${p.name || ''}. Features precise coloring and detailing.`,
+    descriptionHtml: p.descriptionHtml || `<p>${p.description || ''}</p>`,
+    options: p.options || [],
+    priceRange: {
+      minVariantPrice: { amount: priceStr, currencyCode: 'USD' },
+      maxVariantPrice: { amount: priceStr, currencyCode: 'USD' }
+    },
+    variants: p.variants || [],
+    images: p.images || [{ url: imageUrl, altText: p.name }],
+    featuredImage: p.featuredImage || { url: imageUrl, altText: p.name },
+    seo: p.seo || { title: p.name || '', description: p.description || '' },
+    tags: p.tags || [p.category].filter(Boolean),
+    updatedAt: p.updatedAt || new Date().toISOString(),
+
+    // Backwards-compatibility values mapped
+    name: p.name || '',
+    image: imageUrl,
+    price: p.price || 0,
+    category: p.category || 'Uncategorized',
+
+    // App-specific metadata
+    rating: p.rating || 4.5,
+    reviewCount: p.reviewCount || 10,
+    label: p.label,
+    originalPrice: p.originalPrice || p.price || 0,
+    animeSeries: p.category,
+    enabled: p.enabled ?? true,
+    hide: p.hide ?? false,
+    soldOut: p.soldOut ?? false,
+    sourceStore: p.sourceStore || 'AmiAmi Akihabara',
+    sourceUrl: p.sourceUrl || 'https://www.amiami.com/eng/detail/?gcode=FIGURE-' + p.id,
+    purchasePriceJpy: p.purchasePriceJpy || Math.floor((p.price || 0) * 0.17),
+    productWeight: p.productWeight || 450,
+    isPreorder: p.isPreorder ?? (p.label === 'LIMITED'),
+    preorderLimit: p.preorderLimit ?? (p.label === 'LIMITED' ? 10 : undefined),
+    preorderCount: p.preorderCount ?? (p.label === 'LIMITED' ? 4 : undefined),
+  };
+};
+
+/**
+ * Transforms raw Shopify API Product structures into the unified hybrid Product type.
+ * Use this mapping function when writing your fetch queries to populate the store.
+ */
+export const transformShopifyProduct = (shopifyProduct: ShopifyProduct): Product => {
+  const variants = flattenConnection<ProductVariant>(shopifyProduct.variants);
+  const images = flattenConnection<Image>(shopifyProduct.images);
+  
+  const parsedPrice = parseFloat(shopifyProduct.priceRange?.minVariantPrice?.amount || '0');
+  const featuredImageUrl = shopifyProduct.featuredImage?.url || (images[0]?.url || '');
+  const primaryCategory = shopifyProduct.tags?.[0] || 'Uncategorized';
+
+  let label: Product['label'] = undefined;
+  if (shopifyProduct.tags.includes('NEW')) label = 'NEW';
+  else if (shopifyProduct.tags.includes('TRENDING')) label = 'TRENDING';
+  else if (shopifyProduct.tags.includes('LIMITED')) label = 'LIMITED';
+  else if (shopifyProduct.tags.includes('SALE')) label = 'SALE';
+
+  return {
+    ...shopifyProduct,
+    variants,
+    images,
+
+    // Backward-compatibility properties
+    name: shopifyProduct.title,
+    image: featuredImageUrl,
+    price: parsedPrice,
+    category: primaryCategory,
+
+    // Metadata & custom app UI values
+    rating: 4.8,
+    reviewCount: 15,
+    label,
+    originalPrice: parsedPrice,
+    animeSeries: primaryCategory,
+    hide: false,
+    soldOut: !shopifyProduct.availableForSale,
+    enabled: true,
+
+    // Admin & custom parameters
+    sourceStore: 'Shopify Store',
+    sourceUrl: `https://shopify.com/products/${shopifyProduct.handle}`,
+    purchasePriceJpy: Math.round(parsedPrice * 0.17),
+    productWeight: 450,
+    isPreorder: label === 'LIMITED',
+    preorderLimit: label === 'LIMITED' ? 10 : undefined,
+    preorderCount: label === 'LIMITED' ? 4 : undefined,
+  };
+};
+
+// ----------------------------------------------------------------------
+// 3. Seed Static Database Mock Data
+// ----------------------------------------------------------------------
+
+const getInitialProducts = (): Product[] => {
+  return initialProductsData.map((p) => transformLegacyToProduct(p));
+};
+
 const initialShippingOptions: ShippingOption[] = [
   { id: 'ship-1', name: 'Economy Shipping', price: 6000, deliveryEstimate: '5-8 weeks' },
   { id: 'ship-2', name: 'Standard Shipping', price: 12000, deliveryEstimate: '2-3 weeks' },
   { id: 'ship-3', name: 'Express Shipping', price: 25000, deliveryEstimate: '3-7 days' }
 ];
 
-// Seed initial orders list for database requirement
 const getInitialOrders = (): Order[] => [
   {
     id: 'OD-9201',
@@ -384,17 +542,20 @@ const getInitialCustomerNotifications = (): CustomerNotification[] => [
   }
 ];
 
-// Helper to recalculate cart analytics
 const getCartTotals = (cart: CartItem[]) => {
   const count = cart.reduce((total, item) => total + item.quantity, 0);
   const subtotal = cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
   return { cartCount: count, cartSubtotal: subtotal };
 };
 
+// ----------------------------------------------------------------------
+// 4. Zustand Store Definition
+// ----------------------------------------------------------------------
+
 export const useShopStore = create<ShopState>()(
   persist(
     (set, get) => ({
-      // Dynamic catalog
+      // Dynamic catalog (Using the unified hybrid type)
       products: getInitialProducts(),
       setProducts: (products) => set({ products }),
       addProduct: (newProduct) => {
@@ -423,13 +584,13 @@ export const useShopStore = create<ShopState>()(
         set({ products: updatedProducts });
       },
 
-      // Cart
+      // Cart State
       cart: [],
       cartCount: 0,
       cartSubtotal: 0,
       isCartOpen: false,
 
-      // Wishlist
+      // Wishlist State
       wishlist: [],
       wishlistCount: 0,
       isWishlistOpen: false,
@@ -440,7 +601,7 @@ export const useShopStore = create<ShopState>()(
       selectedProduct: null,
       currentRoute: 'home',
       searchFilter: '',
-      categoryFilter: '',
+      categoryFilter: 'all', // Default selection
 
       // Shipping options
       shippingOptions: initialShippingOptions,
@@ -663,7 +824,6 @@ export const useShopStore = create<ShopState>()(
 
       // Cart Actions
       addToCart: (product, size, color) => {
-        // Retrieve current product state (in case it is newly marked sold out/preorder maxed)
         const currentProd = get().products.find(p => p.id === product.id) || product;
         if (currentProd.soldOut) {
           get().showNotification(`Sorry, ${product.name} is currently sold out.`, 'info');

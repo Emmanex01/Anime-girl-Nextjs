@@ -9,12 +9,12 @@ export const SHOPIFY_GRAPHQL_API_ENDPOINT = "/api/2026-04/graphql.json";
 export type SortFilterItem = {
   title: string,
   slug: string,
-  sortKey: 'BEST_SELLING' | 'CREATED_AT' | 'PRICE' | 'RELEVANCE',
+  sortKey: 'BEST_SELLING' | 'CREATED' | 'PRICE' | 'RELEVANCE',
   reverse: boolean
 }
 
 export const defaultSort: SortFilterItem = {
-  title: 'Tranding',
+  title: 'Trending',
   slug: 'trending-desc',
   sortKey: 'BEST_SELLING',
   reverse: false
@@ -23,25 +23,25 @@ export const defaultSort: SortFilterItem = {
 export const sortOption: SortFilterItem[] = [
   defaultSort,
   {
-    title: 'Tranding',
-    slug: 'trending-desc',
+    title: 'MOST POPULAR • 人気順',
+    slug: 'popularity',
     sortKey: 'BEST_SELLING',
     reverse: false
   },
   {
     title: 'Latest arrivals',
     slug: 'latest-desc',
-    sortKey: 'CREATED_AT',
+    sortKey: 'CREATED',
     reverse: true
   },
   {
-    title: 'Price: Low to high',
+    title: 'PRICE: LOW TO HIGH • 価格の安い順',
     slug: 'price-asc',
     sortKey: 'PRICE',
     reverse: false
   },
   {
-    title: 'Price: High to low',
+    title: 'PRICE: HIGH TO LOW • 価格の高い順',
     slug: 'price-desc',
     sortKey: 'PRICE',
     reverse: true

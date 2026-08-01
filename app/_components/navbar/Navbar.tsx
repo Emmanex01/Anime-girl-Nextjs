@@ -30,7 +30,7 @@ export function Navbar({ navLinks }: { navLinks: menu[] }) {
   const { 
     cartCount, 
     wishlistCount, 
-    setCartOpen, 
+    setCartOpen,
     setWishlistOpen,
     isMobileMenuOpen,
     setMobileMenuOpen,
@@ -177,6 +177,7 @@ export function Navbar({ navLinks }: { navLinks: menu[] }) {
             </button>
             <button 
               onClick={() => {
+                console.log('cart button clicked');
                 setCartOpen(true);
               }}
               className="flex items-center gap-2 cursor-pointer group text-white/60 hover:text-white transition-colors relative"

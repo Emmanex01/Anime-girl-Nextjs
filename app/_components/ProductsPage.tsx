@@ -1,95 +1,59 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState} from 'react';
 import { motion } from 'motion/react';
 import { 
   SlidersHorizontal, ArrowUpDown, CornerUpLeft, Search, 
-  Trash2, Sliders, ChevronDown, Check, AppWindow 
+  Trash2, ChevronDown, Check,
 } from 'lucide-react';
-import { ProductCard } from './ProductCard';
 import { useShopStore } from '../store/useShopStore';
 import Link from 'next/link';
+import { useCollectionProducts } from '@/lib/hooks/useShopifyCollections';
+import { useShopifyProducts } from '@/lib/hooks/useShopifyProducts';
+import { sortOption } from '@/lib/constants';
+import ProductCardComponent from './ProductCardComponent';
+import ProductGridSkeleton from './skeleton/ProductSkeleton';
+import CategoryFilterSkeleton from './skeleton/CategoryFilterSkeleton';
 
 export function ProductsPage() {
   const { 
-    currentRoute, 
-    setCurrentRoute, 
     searchFilter, 
     setSearchFilter, 
     categoryFilter, 
     setCategoryFilter,
-    products
   } = useShopStore();
 
-  const [activeSort, setActiveSort] = useState<'popularity' | 'price-asc' | 'price-desc' | 'rating'>('popularity');
+  const { shopifyCollections, collectionLoading } = useCollectionProducts();
+  
+
+  console.log('shopifyCollections', shopifyCollections);
+  console.log("categoryFilter: ",categoryFilter)
+
+  const [activeSort, setActiveSort] =
+  useState<(typeof sortOption)[number]["slug"]>("trending-desc");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
 
-  // Load only visible & enabled products for public view
-  const activeProducts = useMemo(() => {
-    return products.filter((p) => p.enabled !== false && p.hide !== true);
-  }, [products]);
+  const selectedSort =
+  sortOption.find(o => o.slug === activeSort)!;
 
-  // Get distinct categories
-  const categories = useMemo(() => {
-    return ['ALL', ...Array.from(new Set(activeProducts.map((p) => p.category)))];
-  }, [activeProducts]);
+  const {
+        shopifyProducts,
+        productLoading
+    } = useShopifyProducts({
+        search: searchFilter,
+        collection: categoryFilter,
+        sortKey: selectedSort.sortKey,
+        reverse: selectedSort.reverse
+    });
 
-  // Filter and sort items
-  const filteredAndSortedProducts = useMemo(() => {
-    let result = [...activeProducts];
-
-    // Filter by category
-    if (categoryFilter && categoryFilter !== 'ALL') {
-      result = result.filter((p) => p.category.toLowerCase() === categoryFilter.toLowerCase());
-    }
-
-    // Filter by search/tag/label query
-    if (searchFilter) {
-      const q = searchFilter.trim().toLowerCase();
-      
-      // Check if it matches tags exactly, category exactly, or name
-      result = result.filter((p) => {
-        // Tag search matches
-        const tagMatch = p.tags?.some((t) => t.toLowerCase() === q || t.toLowerCase().includes(q)) || false;
-        // Category matches
-        const catMatch = p.category.toLowerCase().includes(q);
-        // Label matches (NEW, LIMITED, TRENDING, SALE)
-        const labelMatch = p.label?.toLowerCase() === q;
-        // Name matches
-        const nameMatch = p.name.toLowerCase().includes(q);
-        
-        return tagMatch || catMatch || labelMatch || nameMatch;
-      });
-    }
-
-    // Apply Sorting
-    if (activeSort === 'price-asc') {
-      result.sort((a, b) => a.price - b.price);
-    } else if (activeSort === 'price-desc') {
-      result.sort((a, b) => b.price - a.price);
-    } else if (activeSort === 'rating') {
-      result.sort((a, b) => b.rating - a.rating);
-    } else {
-      // Popularity (default, sorting by review count or id)
-      result.sort((a, b) => b.reviewCount - a.reviewCount);
-    }
-
-    return result;
-  }, [activeProducts, categoryFilter, searchFilter, activeSort]);
+    console.log(shopifyProducts);
 
   const handleClearFilters = () => {
     setSearchFilter('');
-    setCategoryFilter('');
-    setActiveSort('popularity');
+    setCategoryFilter('all');
+    setActiveSort('trending-desc');
   };
 
-  const sortOptions = [
-    { value: 'popularity', label: 'MOST POPULAR • 人気順' },
-    { value: 'price-asc', label: 'PRICE: LOW TO HIGH • 価格の安い順' },
-    { value: 'price-desc', label: 'PRICE: HIGH TO LOW • 価格の高い順' },
-    { value: 'rating', label: 'TOP RATED • 評価順' },
-  ];
-
-  const currentSortLabel = sortOptions.find(opt => opt.value === activeSort)?.label || '';
+  const currentSortLabel = sortOption.find(opt => opt.slug === activeSort)?.title || '';
 
   return (
     <div className="pt-32 pb-24 min-h-screen bg-background text-white selection:bg-neon-red/30 relative">
@@ -163,17 +127,17 @@ export function ProductsPage() {
               {/* Options */}
               {showSortDropdown && (
                 <div className="absolute top-12 right-0 left-0 z-40 mt-1 bg-[#0d101d] border border-white/10 rounded-sm shadow-xl p-1 overflow-hidden">
-                  {sortOptions.map((opt) => (
+                  {sortOption.map((opt) => (
                     <button
-                      key={opt.value}
+                      key={opt.slug}
                       onClick={() => {
-                        setActiveSort(opt.value as any);
+                        setActiveSort(opt.slug as any);
                         setShowSortDropdown(false);
                       }}
                       className="w-full px-3 py-2.5 rounded-sm text-left text-[9px] font-black tracking-widest uppercase flex items-center justify-between transition-colors hover:bg-white/5 text-white hover:text-neon-blue cursor-pointer"
                     >
-                      <span>{opt.label}</span>
-                      {activeSort === opt.value && <Check className="w-3.5 h-3.5 text-neon-blue" />}
+                      <span>{opt.title}</span>
+                      {activeSort === opt.slug && <Check className="w-3.5 h-3.5 text-neon-blue" />}
                     </button>
                   ))}
                 </div>
@@ -207,13 +171,16 @@ export function ProductsPage() {
               {/* Category Links */}
               <div className="space-y-1">
                 <span className="text-[9px] font-black tracking-widest text-white/30 uppercase block mb-3">ANIME UNIVERSE • 作品から探す</span>
-                {categories.map((cat) => {
-                  const isSelected = (!categoryFilter && cat === 'ALL') || (categoryFilter === cat);
+                { collectionLoading ? (
+                  <CategoryFilterSkeleton/>
+                ) :
+                shopifyCollections.map((cat) => {
+                  const isSelected = categoryFilter === cat.handle;
                   return (
                     <button
-                      key={cat}
+                      key={cat.handle}
                       onClick={() => {
-                        setCategoryFilter(cat === 'ALL' ? '' : cat);
+                        setCategoryFilter(cat.handle);
                       }}
                       className={`w-full text-left py-2 px-3 rounded-sm transition-all text-[10px] font-black tracking-widest uppercase flex items-center justify-between cursor-pointer group ${
                         isSelected 
@@ -221,7 +188,7 @@ export function ProductsPage() {
                           : 'text-white/60 hover:text-white hover:bg-white/5'
                       }`}
                     >
-                      <span className="truncate group-hover:translate-x-0.5 transition-transform">{cat}</span>
+                      <span className="truncate group-hover:translate-x-0.5 transition-transform">{cat.title}</span>
                     </button>
                   );
                 })}
@@ -282,22 +249,24 @@ export function ProductsPage() {
               </div>
             )}
 
-            {filteredAndSortedProducts.length > 0 ? (
+            {productLoading ? (
+                <ProductGridSkeleton />
+              ) :shopifyProducts.length > 0 ? (
               <div className="space-y-12">
                 <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
-                  AVAILABLE LISTINGS ({filteredAndSortedProducts.length})
+                  AVAILABLE LISTINGS ({shopifyProducts.length})
                 </div>
                 
                 {/* Product Cards Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {filteredAndSortedProducts.map((p, index) => (
+                  {shopifyProducts.map((p, index) => (
                     <motion.div
                       key={p.id}
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05, duration: 0.4 }}
                     >
-                      <ProductCard product={p} />
+                      <ProductCardComponent product={p} />
                     </motion.div>
                   ))}
                 </div>

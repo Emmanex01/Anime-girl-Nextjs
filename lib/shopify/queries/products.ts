@@ -1,4 +1,6 @@
+import imageFragment from "../fragment/image";
 import productFragment from "../fragment/product";
+import seoFragment from "../fragment/seo";
 
 
 // GraphQL query to fetch products from Shopify Storefront API
@@ -16,58 +18,20 @@ export const productsQuery = `
 `;
 
 // Query to fetch a single product by handle
-// export const productQuery = `
-//   query GetProduct($handle: String!) {
-//     productByHandle(handle: $handle) {
-//       id
-//       title
-//       handle
-//       description
-//       vendor
-//       productType
-//       rating: metafield(namespace: "custom" key: "rating") {
-//         value
-//       }
-//       reviewCount: metafield(namespace: "custom" key: "review_count") {
-//         value
-//       }
-//       priceRange {
-//         minVariantPrice {
-//           amount
-//           currencyCode
-//         }
-//         maxVariantPrice {
-//           amount
-//           currencyCode
-//         }
-//       }
-//       images(first: 10) {
-//         edges {
-//           node {
-//             url
-//             altText
-//           }
-//         }
-//       }
-//       variants(first: 20) {
-//         edges {
-//           node {
-//             id
-//             title
-//             availableForSale
-//             price {
-//               amount
-//               currencyCode
-//             }
-//             selectedOptions {
-//               name
-//               value
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-//     ${imageFragment}
-//     ${seoFragment}
-// `;
+export const productQuery = `
+  query getProduct($handle: String!) {
+    product(handle: $handle) {
+      ...product
+    }
+  }
+  ${productFragment}
+`;
+
+export const getProductRecommendationsQuery = /* GraphQL */ `
+  query getProductRecommendations($productId: ID!) {
+    productRecommendations(productId: $productId) {
+      ...product
+    }
+  }
+  ${productFragment}
+`;

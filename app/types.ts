@@ -1,17 +1,26 @@
-export interface Product {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  rating: number;
-  reviewCount: number;
-  image: string;
+import { ShopifyProduct, ProductVariant, Image } from '@/lib/shopify/types'; // Update paths as appropriate
+
+/**
+ * The core application Product. 
+ * Combines live Shopify parameters with legacy compatibility layers and warehouse metadata.
+ */
+export interface Product extends Omit<ShopifyProduct, 'variants' | 'images'> {
+  variants: ProductVariant[];
+  images: Image[];
+
+  // --- Backward-Compatibility Layer (Prevents UI Breakage) ---
+  name: string;           // Maps to Shopify's `title`
+  image: string;          // Maps to Shopify's `featuredImage.url`
+  price: number;          // Mapped as number from priceRange.minVariantPrice.amount
+  category: string;       // Mapped from tags or productType
+
+  // --- Legacy UI & Metadata Fields ---
+  rating?: number;
+  reviewCount?: number;
   label?: 'NEW' | 'TRENDING' | 'LIMITED' | 'SALE';
   originalPrice?: number;
-  tags?: string[];
   
   // Inventory & Admin Fields
-  description?: string;
   animeSeries?: string;
   hide?: boolean;
   soldOut?: boolean;
