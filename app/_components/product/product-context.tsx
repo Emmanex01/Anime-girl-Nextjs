@@ -48,7 +48,7 @@ export function ProductProvider({children}: {children: React.ReactNode}) {
         const newState = { image: index};
         setOptimisticState(newState);
         
-        return { ...state, ...updateImage}
+        return { ...state, ...newState };
     };
 
     const value = useMemo(
@@ -81,5 +81,7 @@ export function useUpdateUrl() {
         Object.entries(state).forEach(([key, value]) => {
             newParams.set(key, value);
         });
-    }
+
+        router.push(`?${newParams.toString()}`, { scroll: false });
+    };
 }

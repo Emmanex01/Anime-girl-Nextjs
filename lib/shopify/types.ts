@@ -239,6 +239,14 @@ export type ShopifyUpdateCartOperation = {
   data: {
     cartLinesUpdate: {
       cart: ShopifyCart;
+      userErrors: {
+        field: any
+        message: any
+      };
+      warnings: {
+          code: any
+          message: any
+      }
     };
   };
   variables: {

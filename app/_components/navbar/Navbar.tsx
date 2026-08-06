@@ -10,6 +10,7 @@ import Link from 'next/link';
 import MobileMenu from './MobileMenu';
 import { menu } from '@/lib/shopify/types';
 import SearchComponent from './Search';
+import { useCart } from '../cart/cart-context';
 
 const navLinks = [
   { name: 'HOME' },
@@ -27,8 +28,7 @@ export function Navbar({ navLinks }: { navLinks: menu[] }) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLinkActive, setIsLinkActive] = useState<string>('Home');
 
-  const { 
-    cartCount, 
+  const {  
     wishlistCount, 
     setCartOpen,
     setWishlistOpen,
@@ -41,6 +41,15 @@ export function Navbar({ navLinks }: { navLinks: menu[] }) {
     searchFilter,
     currentCustomer
   } = useShopStore();
+
+  const { cart } = useCart();
+  const cartCount = cart ? cart.lines.length : 0;
+
+  if (!cart) {
+    console.log('Cart is undefined');
+  } else {
+    console.log('Cart:', cart);
+  }
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);

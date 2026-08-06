@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Trash2, Plus, Minus, ArrowRight, ShoppingBag, CheckCircle, MapPin, Truck, ShieldCheck, Mail } from 'lucide-react';
 import { useShopStore } from '../store/useShopStore';
@@ -6,29 +6,23 @@ import { Order, OrderItem } from '../types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from './cart/cart-context';
+import { createCartAndsetCookies, removeItem } from './cart/action';
+import { useRouter } from 'next/navigation';
+import { EditItemQuantityButton } from './cart/edit-item-quantity-button';
 
 export function CartDrawer() {
   const {  
-    cartSubtotal, 
     isCartOpen, 
     setCartOpen, 
-    updateCartQuantity, 
-    removeFromCart,
-    clearCart,
     shippingOptions,
-    addOrder,
-    updateProduct,
-    setCurrentRoute,
     products
   } = useShopStore();
 
-  console.log({
-  cartSubtotal,
-  type: typeof cartSubtotal,
-  value: cartSubtotal
-});
+  const router = useRouter();
 
-  const { cart } = useCart();
+  const { cart, updateCartItem } = useCart();
+  const cartSubtotal = Number(cart?.cost?.subtotalAmount?.amount ?? 0);
+  const cartTotalAmount = cart?.cost.totalAmount.amount ?? 0;
 
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [customerName, setCustomerName] = useState('');
@@ -40,6 +34,16 @@ export function CartDrawer() {
   const shippingCost = selectedShipping ? selectedShipping.price : 0;
   const transactionFee = cartSubtotal > 0 ? 1200 : 0;
   const cartTotal = cartSubtotal + shippingCost + transactionFee;
+
+  useEffect(() => {
+    if (!cart) {
+      createCartAndsetCookies();
+    }
+  }, [cart]);
+
+  const handleCreateOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+  };
 
   // const handleCreateOrder = (e: React.FormEvent) => {
   //   e.preventDefault();
@@ -125,7 +129,13 @@ export function CartDrawer() {
   //   // Set cookie/hash or simply let them search it in track-order view
   //   window.location.hash = `/track-order?id=${orderId}`;
   // };
-
+console.log(
+  'Drawer:',
+  cart?.lines.map(line => ({
+    id: line.id,
+    qty: line.quantity,
+  }))
+);
   
 
   return (
@@ -368,11 +378,11 @@ export function CartDrawer() {
                     cart?.lines.map((item) => {
                       const color = item.merchandise.selectedOptions.find(opt => opt.name.toLowerCase() === 'color')?.value || null;
                       const size = item.merchandise.selectedOptions.find(opt => opt.name.toLowerCase() === 'size')?.value || null;
-                      const itemKey = `${item.id}-${size || 'std'}-${color || 'std'}`;
-                      const image = item.merchandise.product.featuredImage ?? item.merchandise.product.featuredImage?.[0] ?? null;
+                      const itemKey = `${item.merchandise.id}-${size || 'std'}-${color || 'std'}`;
+                      const image = item.merchandise.product.featuredImage ?? null;
                       
                       // Preorder tags calculations
-                      const dbProduct = products.find(p => p.id === item.id);
+                      const dbProduct = products.find(p => p.id === item.merchandise.product.id);
                       const isPre = dbProduct?.isPreorder;
                       const limit = dbProduct?.preorderLimit || 10;
                       const purchased = dbProduct?.preorderCount || 0;
@@ -389,7 +399,7 @@ export function CartDrawer() {
                             {image ? 
                               <Image 
                                 src={image.url}
-                                alt={item.product.title}
+                                alt={item.merchandise.product.title}
                                 width={10}
                                 height={5}
                                 className="w-full h-full object-cover" 
@@ -411,7 +421,15 @@ export function CartDrawer() {
                                   {item.merchandise.product.title}
                                 </h4>
                                 <button 
-                                  onClick={() => removeFromCart(item.id, size, color)}
+                                  onClick={() => {
+                                    console.log('Removing item from cart:', item.merchandise.id);
+                                    updateCartItem(item.merchandise.id, 'delete');
+
+                                    removeItem(null, item.merchandise.id)
+
+                                    router.refresh(); // Refresh the page to reflect the updated cart state
+                                    console.log('Delete item from cart:', item.merchandise.id);
+                                  }}
                                   className="text-white/30 hover:text-neon-red p-1 transition-colors cursor-pointer"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -448,33 +466,24 @@ export function CartDrawer() {
                             <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
                               {/* Quantity controls */}
                               <div className="flex items-center gap-1 border border-white/5 bg-black/30 rounded-sm p-0.5">
-                                <button
-                                  onClick={() => updateCartQuantity(item.id, item.quantity - 1, size, color)}
-                                  className="w-5 h-5 rounded-sm hover:bg-white/5 flex items-center justify-center text-white/50 hover:text-white cursor-pointer"
-                                >
-                                  <Minus className="w-2.5 h-2.5" />
-                                </button>
+                                <EditItemQuantityButton
+                                  type='minus'
+                                  item={item}
+                                  optimisticUpdate={updateCartItem}
+                                />
                                 <span className="w-8 text-center text-[10px] font-mono font-bold text-white leading-none">
                                   {item.quantity}
                                 </span>
-                                <button
-                                  onClick={() => {
-                                    // Limit checks for preorders
-                                    if (isPre && item.quantity >= remaining) {
-                                      useShopStore.getState().showNotification(`Cannot exceed preorder slot remaining limit (${remaining}).`, 'info');
-                                      return;
-                                    }
-                                    updateCartQuantity(item.id, item.quantity + 1, size, color);
-                                  }}
-                                  className="w-5 h-5 rounded-sm hover:bg-white/5 flex items-center justify-center text-white/50 hover:text-white cursor-pointer"
-                                >
-                                  <Plus className="w-2.5 h-2.5" />
-                                </button>
+                                <EditItemQuantityButton
+                                  type='plus'
+                                  item={item}
+                                  optimisticUpdate={updateCartItem}
+                                />
                               </div>
                             
                               {/* Price item total */}
                               <span className="font-display font-black text-sm italic text-white">
-                                N{(item.product.price * item.quantity).toLocaleString()}
+                                N{(Number(item.cost.totalAmount.amount) || 0).toLocaleString()}
                               </span>
                             </div>
                           </div>
@@ -487,7 +496,7 @@ export function CartDrawer() {
             </div>
 
             {/* Footer Summary is ONLY visible during active cart step */}
-            {!placedOrder && !isCheckingOut && cart.length > 0 && (
+            {!placedOrder && !isCheckingOut && (cart?.lines?.length ?? 0) > 0 && (
               <div className="p-6 bg-[#090b12] border-t border-white/10 space-y-4 flex-shrink-0">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-[10px] font-black tracking-wider uppercase text-white/40">
@@ -496,7 +505,7 @@ export function CartDrawer() {
                   </div>
                   <div className="flex justify-between items-center text-[10px] font-black tracking-wider uppercase text-white/40">
                      <span>SHIPPING ESTIMATES</span>
-                     <span className="font-mono text-white">Calculated at checkout step</span>
+                     <span className="font-mono text-white">N 0</span>
                   </div>
                   <div className="flex justify-between items-center text-[10px] font-black tracking-wider uppercase text-white/40">
                      <span>NEURAL TRANSACTION FEE</span>
@@ -508,7 +517,7 @@ export function CartDrawer() {
                   <div className="flex justify-between items-baseline">
                      <span className="text-xs font-display font-black italic uppercase tracking-wider text-white">ESTIMATED TOTAL</span>
                      <span className="font-display font-black text-2xl italic tracking-tighter text-neon-red">
-                       N{(cartSubtotal + transactionFee).toLocaleString()}
+                       N{(cartTotalAmount).toLocaleString()}
                      </span>
                   </div>
                 </div>

@@ -2,7 +2,7 @@
 import { Product } from "@/app/types";
 import { Cart, CartItem, ProductVariant } from "@/lib/shopify/types";
 import { number } from "motion";
-import { createContext, use, useContext, useMemo, useOptimistic } from "react";
+import { createContext, startTransition, use, useContext, useMemo, useOptimistic } from "react";
 
 type updateType = 'plus' | 'minus' | 'delete';
 
@@ -43,7 +43,7 @@ function updateCartItem(item: CartItem, updateType: updateType): CartItem | null
 
     if (newQuantity === 0) return null;
 
-    const singleItemAmount = Number(item.cost.totalAmount) / item.quantity;
+    const singleItemAmount = Number(item.cost.totalAmount.amount) / item.quantity;
     const newTotalAmount = calculateItemCost(
         newQuantity,
         singleItemAmount.toString()
@@ -65,7 +65,7 @@ function updateCartItem(item: CartItem, updateType: updateType): CartItem | null
 function updateCartTotals(lines: CartItem[]): Pick<Cart, 'totalQuantity' | 'cost'> {
     const totalQuantity = lines.reduce((sum, item) => sum + item.quantity, 0);
     const totalAmount = lines.reduce(
-        (sum, item) => sum + Number(item.cost.totalAmount),
+        (sum, item) => sum + Number(item.cost.totalAmount.amount),
          0
         );
 
@@ -182,14 +182,22 @@ export function CartProvider({
     );
 
     const updateCartItem = (merchandiseId: string, updateType: updateType) => {
-        updateOptimisticCart({
-            type: "UPDATE_ITEM",
-            payload: { merchandiseId, updateType}
+        console.log('Updating cart item:', merchandiseId, updateType);
+        startTransition(() => {
+            updateOptimisticCart({
+                type: "UPDATE_ITEM",
+                payload: { merchandiseId, updateType}
+            });
         });
     };
 
     const addCartItem = (variant: ProductVariant, product: Product) => {
-        updateOptimisticCart({ type: "ADD_ITEM", payload: {variant, product}})
+        startTransition(() => {
+            updateOptimisticCart({
+                type: "ADD_ITEM",
+                payload: { variant, product}
+            });
+        });
     };
 
     const value = useMemo(
@@ -200,6 +208,9 @@ export function CartProvider({
         }),
         [optimisticCart]
     )
+
+    console.log('CartProvider rendered with cart:', optimisticCart);
+    console.log('CartProvider value:', value);
 
     return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }

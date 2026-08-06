@@ -49,7 +49,7 @@ const ProductPage = async ({ params }: PageProps) => {
 
   return (
     <div>  
-      <ProductDetailsContent key={id} product={product[0]} /> 
+        <ProductDetailsContent key={id} product={product[0]} /> 
     </div>
   );
 };

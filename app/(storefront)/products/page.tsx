@@ -1,10 +1,13 @@
+import { ProductProvider } from '@/app/_components/product/product-context'
 import { ProductsPage } from '@/app/_components/ProductsPage'
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-      <ProductsPage/>
+      <ProductProvider>
+        <ProductsPage/>
+      </ProductProvider>
     </div>
   )
 }

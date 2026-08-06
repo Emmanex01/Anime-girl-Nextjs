@@ -9,6 +9,8 @@ import { useShopStore } from "../store/useShopStore";
 
 // Import our unified hybrid Product type to match our Zustand Store definitions
 import { Product } from "../types"; 
+import { useCart } from "./cart/cart-context";
+import { AddToCart } from "./cart/add-to-cart";
 
 type Props = {
   product: Product;
@@ -16,7 +18,8 @@ type Props = {
 
 export default function ProductCardComponent({ product }: Props) {
   const router = useRouter();
-  const { addToCart, addToWishlist, removeFromWishlist, isWishlisted } = useShopStore();
+  const { addToWishlist, removeFromWishlist, isWishlisted } = useShopStore();
+  const { addCartItem } = useCart(); // Ensure we are using the correct unique identifier for the product
   
   // Fix: isWishlisted expects unique product.id matching your state schema, not the handle
   const wishlisted = isWishlisted(product.id);
@@ -47,7 +50,13 @@ export default function ProductCardComponent({ product }: Props) {
   const handleCartClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product);
+
+    const variant = product.variants?.[0]; // Assuming the first variant is the default selection
+    if (!variant) {
+      console.error("No variant available for this product.");
+      return;
+    }
+    addCartItem(variant, product);
   };
 
   return (
@@ -140,7 +149,7 @@ export default function ProductCardComponent({ product }: Props) {
             {/* Bottom */}
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-bold text-zinc-400">
+                <p className="text-[10px] font-bold text-zinc-400">
                   {price.amount} {price.currencyCode}
                 </p>
               </div>
@@ -148,10 +157,9 @@ export default function ProductCardComponent({ product }: Props) {
               {/* Fix: Evaluates and handles cart click correctly on execution */}
               <div
                 onClick={handleCartClick}
-                className="flex items-center gap-2 rounded-xl bg-black px-3 py-1.5 text-[12px] font-medium text-white transition hover:bg-zinc-800 cursor-pointer"
+                className=" bg-black text-[12px] font-medium text-white transition hover:bg-zinc-800 cursor-pointer"
               >
-                <ShoppingCart size={16} />
-                Add to Cart
+                <AddToCart product={product} />
               </div>
             </div>
           </div>

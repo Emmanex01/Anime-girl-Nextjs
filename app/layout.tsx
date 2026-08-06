@@ -7,8 +7,9 @@ import { WishlistDrawer } from "./_components/WishlistDrawer";
 import { NotificationToast } from "./_components/NotificationToast";
 import CartDrawerWrapper from "./_components/CartDrawerWrapper";
 import { cookies } from "next/headers";
-import { getCart } from "@/lib/shopify";
 import { CartProvider } from "./_components/cart/cart-context";
+import { getCart } from "@/lib/shopify";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,10 +31,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cartId = (await cookies()).get('cardId')?.value;
-  const cart = getCart(cartId);
-  console.log('cartId', cartId)
-  console.log('cart', cart)
+ 
+    let cartId = (await cookies()).get("cartId")?.value;
+    console.log("cartId from cookies:", cartId);
+
+    const cart = getCart(cartId);
+    console.log("cartPromise:", cart);
+  
   return (
     <html
       lang="en"

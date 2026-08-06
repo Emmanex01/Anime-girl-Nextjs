@@ -7,7 +7,7 @@ import { isShopifyError } from "../type-guards";
 import { getCollectionProductsQuery, getCollectionsQuery } from "./queries/collection";
 import { transformShopifyProduct } from "@/utils/productAdapter";
 import { Product } from "@/app/types";
-import { addToCartMutation, createCartMutation, editCartItemsCartMutation, removeFromCartMutation } from "./mutations/cart";
+import { addToCartMutation, createCartMutation, editCartItemsMutation, removeFromCartMutation } from "./mutations/cart";
 import { getCartQuery } from "./queries/cart";
 
 
@@ -336,7 +336,7 @@ export async function updateCart(
   lines: {id: string; merchandiseId: string; quantity: number}[]
 ): Promise<Cart> {
   const res = await shopifyFetch<ShopifyUpdateCartOperation>({
-    query: editCartItemsCartMutation,
+    query: editCartItemsMutation,
     variables: {
       cartId,
       lines,
@@ -356,7 +356,8 @@ export async function getCart(cartId: string | undefined): Promise<Cart | undefi
   const res = await shopifyFetch<ShopifyCartOperation>({
     query: getCartQuery,
     variables: { cartId },
-    tags: [TAGS.carts]
+    tags: [TAGS.carts],
+    cache: 'no-store'
   })
 
   // old carts becomes 'null' when you checkout
