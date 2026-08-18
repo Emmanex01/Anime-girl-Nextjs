@@ -297,12 +297,13 @@ export async function getProduct(handle: string): Promise<Product | undefined> {
   const res = await shopifyFetch<ShopifyProductOperation>({
     query: productQuery,
     tags: [TAGS.products],
+    cache: 'no-store',
     variables: {
       handle,
     }
   });
 
-  return transformShopifyProduct(res.body.data.products);
+  return transformShopifyProduct(res.body.data.product);
 }
 
 

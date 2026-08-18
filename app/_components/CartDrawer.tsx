@@ -6,7 +6,7 @@ import { Order, OrderItem } from '../types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from './cart/cart-context';
-import { createCartAndsetCookies, removeItem } from './cart/action';
+import { createCartAndsetCookies, redirectToCheckout, removeItem } from './cart/action';
 import { useRouter } from 'next/navigation';
 import { EditItemQuantityButton } from './cart/edit-item-quantity-button';
 
@@ -45,73 +45,6 @@ export function CartDrawer() {
     e.preventDefault();
   };
 
-  // const handleCreateOrder = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!customerName.trim() || !customerEmail.trim()) return;
-
-  //   // Create unique Order ID
-  //   const orderId = 'OD-' + Math.floor(1000 + Math.random() * 9000);
-
-  //   // Map cart items to order items structure
-  //   const orderItems: OrderItem[] = cart?.lines.map(item => ({
-  //     id: item.id,
-  //     name: item.merchandise.product.title,
-  //     price: item.cost.totalAmount.amount,
-  //     quantity: item.quantity,
-  //     size: item.merchandise.selectedOptions.find(opt => opt.name.toLowerCase() === 'size')?.value || null,
-  //     color: item.merchandise.selectedOptions.find(opt => opt.name.toLowerCase() === 'color')?.value || null,
-  //     image: item.merchandise.product.featuredImage
-  //   }));
-
-    // Trigger Pre-order increment logic
-    // cart.forEach(item => {
-    //   const dbProduct = products.find(p => p.id === item.product.id);
-    //   if (dbProduct && dbProduct.isPreorder) {
-    //     const currentCount = dbProduct.preorderCount || 0;
-    //     const limit = dbProduct.preorderLimit || 10;
-    //     const nextCount = currentCount + item.quantity;
-        
-    //     let shouldMarkSoldOut = false;
-    //     if (nextCount >= limit) {
-    //       shouldMarkSoldOut = true;
-    //     }
-
-    //     updateProduct(dbProduct.id, {
-    //       preorderCount: nextCount,
-    //       soldOut: shouldMarkSoldOut || dbProduct.soldOut,
-    //       enabled: !shouldMarkSoldOut
-    //     });
-    //   }
-    // });
-
-    // Construct the new order in state DB (Order Status History seeded)
-  //   const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 16);
-  //   const newOrder: Order = {
-  //     id: orderId,
-  //     customerName,
-  //     customerEmail,
-  //     products: orderItems,
-  //     amountPaid: cartTotal,
-  //     shippingMethod: selectedShipping ? `${selectedShipping.name} (${selectedShipping.deliveryEstimate})` : 'Standard Shipping',
-  //     status: 'Order Received',
-  //     trackingNumber: 'OTK-TRK-' + Math.floor(10000 + Math.random() * 90000),
-  //     dateCreated: new Date().toISOString().split('T')[0],
-  //     statusHistory: [
-  //       {
-  //         id: 'sh-' + Math.random().toString(36).substring(2, 9),
-  //         status: 'Order Received',
-  //         timestamp,
-  //         updatedBy: 'System',
-  //         note: 'Customer completed checkout successfully.'
-  //       }
-  //     ]
-  //   };
-
-  //   addOrder(newOrder);
-  //   setPlacedOrder(newOrder);
-  //   clearCart();
-  // };
-
   const handleClose = () => {
     setCartOpen(false);
     // Reset local wizard states
@@ -123,12 +56,6 @@ export function CartDrawer() {
     }, 400);
   };
 
-  // const handleGoToTracking = (orderId: string) => {
-  //   handleClose();
-  //   setCurrentRoute('track-order');
-  //   // Set cookie/hash or simply let them search it in track-order view
-  //   window.location.hash = `/track-order?id=${orderId}`;
-  // };
 console.log(
   'Drawer:',
   cart?.lines.map(line => ({
@@ -523,7 +450,10 @@ console.log(
                 </div>
 
                 <button
-                  onClick={() => setIsCheckingOut(true)}
+                  onClick={() => {
+                    setIsCheckingOut(true);
+                    redirectToCheckout();
+                  }}
                   className="w-full bg-neon-red hover:bg-neon-red/90 text-white font-black h-12 rounded-sm text-[11px] tracking-[0.2em] uppercase italic transition-all flex items-center justify-center gap-2 group shadow-[0_0_20px_rgba(255,0,60,0.4)] cursor-pointer"
                 >
                   SECURE CHECKOUT 

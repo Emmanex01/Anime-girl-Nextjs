@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   getCollectionProducts,
 } from "@/lib/shopify";
-import { Product } from "@/lib/shopify/types";
+import { Product } from "@/app/types";
+
 
 export async function GET(request: NextRequest) {
   try {

@@ -86,7 +86,7 @@ export type ProductVariant = {
 
 export type Image = {
   url: string;
-  altText?: string;
+  altText: string;
   width?: number;
   height?: number;
 };
@@ -143,7 +143,7 @@ export type ShopifyProductsOperation = {
 
 export type ShopifyProductOperation = {
   data: {
-    products: ShopifyProduct;
+    product: ShopifyProduct;
   };
   variables: {
     handle: string;

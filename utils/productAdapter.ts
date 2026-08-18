@@ -11,9 +11,22 @@ const flattenConnection = <T>(connection: { edges: Array<{ node: T }> } | undefi
 /**
  * Converts a raw Shopify API Product response into the unified app Product model.
  */
-export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product {
+export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product | undefined {
+
+  if (!shopifyProduct) return undefined;
   const variants = flattenConnection<ProductVariant>(shopifyProduct.variants);
   const images = flattenConnection<Image>(shopifyProduct.images);
+
+  console.log(
+    'SHOPIFY IMAGES:',
+    shopifyProduct.images?.edges?.length
+  );
+
+  console.log(
+    'TRANSFORMED IMAGES:',
+    images.length,
+    images
+  );
   
   const parsedPrice = parseFloat(shopifyProduct.priceRange?.minVariantPrice?.amount || '0');
   const featuredImageUrl = shopifyProduct.featuredImage?.url || (images[0]?.url || '');
