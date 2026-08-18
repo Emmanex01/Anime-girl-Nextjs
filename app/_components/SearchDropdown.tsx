@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Search, CornerDownLeft } from 'lucide-react';
-import { Product } from '@/lib/shopify/types';
+import { Product } from '../types';
+
 
 interface SearchDropdownProps {
   query: string;
