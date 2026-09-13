@@ -1,4 +1,4 @@
-import { menu, shopifyMenuOperation, ShopifyProduct, ShopifyProductOperation, Connection, Image, ShopifyCollectionOperation, Collection, ShopifyCollection, ShopifyCollectionProductsOperation, ShopifyAddToCartOperation, Cart, ShopifyCart, ShopifyProductsOperation, ShopifyProductRecommendationsOperation, ShopifyCartOperation, ShopifyCreateCartOperation, ShopifyRemoveFromCartOperation, ShopifyUpdateCartOperation } from "./types";
+import { menu, shopifyMenuOperation, ShopifyProduct, ShopifyProductOperation, Connection, Image, ShopifyCollectionOperation, Collection, ShopifyCollection, ShopifyCollectionProductsOperation, ShopifyAddToCartOperation, Cart, ShopifyCart, ShopifyProductsOperation, ShopifyProductRecommendationsOperation, ShopifyCartOperation, ShopifyCreateCartOperation, ShopifyRemoveFromCartOperation, ShopifyUpdateCartOperation, ShopifyCartBuyerIdentityUpdateOperation } from "./types";
 import { getMenuQuery } from "./queries/menu";
 import { getProductRecommendationsQuery, productQuery, productsQuery } from "./queries/products";
 import { HIDDEN_PRODUCT_TAG, TAGS } from "../constants";
@@ -7,7 +7,7 @@ import { isShopifyError } from "../type-guards";
 import { getCollectionProductsQuery, getCollectionsQuery } from "./queries/collection";
 import { transformShopifyProduct } from "@/utils/productAdapter";
 import { Product } from "@/app/types";
-import { addToCartMutation, createCartMutation, editCartItemsMutation, removeFromCartMutation } from "./mutations/cart";
+import { addToCartMutation, createCartMutation, editCartItemsMutation, removeFromCartMutation, cartBuyerIdentityUpdateMutation } from "./mutations/cart";
 import { getCartQuery } from "./queries/cart";
 
 
@@ -365,4 +365,42 @@ export async function getCart(cartId: string | undefined): Promise<Cart | undefi
   if(!res.body.data.cart) return undefined;
 
   return reshapeCart(res.body.data.cart);
+}
+
+export async function updateCartBuyerIdentity(
+  cartId: string,
+  customerAccessToken: string
+): Promise<Cart | undefined> {
+  const res = await shopifyFetch<ShopifyCartBuyerIdentityUpdateOperation>({
+    query: cartBuyerIdentityUpdateMutation,
+    variables: {
+      cartId,
+      buyerIdentity: {
+        customerAccessToken,
+      },
+    },
+    cache: 'no-store'
+  });
+
+  if (!res.body.data.cartBuyerIdentityUpdate) {
+    return undefined;
+  }
+
+  const { userErrors, warnings } = res.body.data.cartBuyerIdentityUpdate;
+
+  if (userErrors) {
+    console.error(
+      'Cart buyer identity update errors:',
+      userErrors
+    );
+  }
+
+  if (warnings) {
+    console.warn(
+      'Cart buyer identity update warnings:',
+      warnings
+    );
+  }
+
+  return reshapeCart(res.body.data.cartBuyerIdentityUpdate.cart);
 }

@@ -1,4 +1,4 @@
-import React from 'react'
+import AccountMenuServer from '../account/account-menu-wrapper';
 import { Navbar } from './Navbar'
 import { getMenu } from '@/lib/shopify';
 
@@ -6,7 +6,7 @@ const NavbarWrapper = async () => {
     const navLinks = await getMenu("main-menu");
   return (
     <div>
-      <Navbar navLinks={navLinks} />
+      <Navbar navLinks={navLinks} accountMenu={<AccountMenuServer />} />
     </div>
   )
 }

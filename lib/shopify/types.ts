@@ -3,6 +3,23 @@ export type menu = {
   path: string;
 }
 
+export type shopifyCustomer = {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  emailAddress: {
+    emailAddress: string;
+  } | null;
+  defaultAddress: {
+    address1: string | null;
+    address2: string | null;
+    city: string | null;
+    province: string | null;
+    country: string | null;
+    zip: string | null;
+  } | null;
+};
+
 export type shopifyMenuOperation = {
   data: {
     menu?: { 
@@ -293,6 +310,28 @@ export type ShopifyProductRecommendationsOperation = {
   };
   variables: {
     productId: string;
+  };
+}
+
+export type ShopifyCartBuyerIdentityUpdateOperation = {
+  data: {
+    cartBuyerIdentityUpdate: {
+      cart: ShopifyCart;
+      userErrors: {
+        field: any;
+        message: any;
+      };
+      warnings: {
+        code: any;
+        message: any;
+      };
+    };
+  };
+  variables: {
+    cartId: string;
+    buyerIdentity: {
+      customerAccessToken?: string;
+    };
   };
 }
 

@@ -3,6 +3,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ['bunt-rundown-zealous.ngrok-free.dev'],
   images: {
     remotePatterns: [
       {

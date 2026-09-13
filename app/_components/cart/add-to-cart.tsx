@@ -59,11 +59,11 @@ function SubmitButton({
 
 export function AddToCart({ product }: { product: Product }) {
     const { variants, availableForSale } = product;
-    const { addCartItem } = useCart();
+    const { addCartItem, setCart } = useCart();
     const { state } = useProduct();
     const [isPending, startTransition] = useTransition();
     const [message, setMessage] = useState<string | null>(null);
-    const router = useRouter(); // 👈 2. Initialize router
+    const router = useRouter();
 
     const variant = variants.find((variant: ProductVariant) => 
         variant.selectedOptions.every(
@@ -84,13 +84,14 @@ export function AddToCart({ product }: { product: Product }) {
 
             // 2. Run server action
             const result = await addItem(null, selectedVariantId);
-            
-            if (result) {
-                setMessage(result);
+
+            if (result && typeof result === 'object' && 'cart' in result && result.cart) {
+                setCart(result.cart);
             }
 
-            // 3. Refresh Server Components (updates Cart Badge/Header instantly!)
-            router.refresh(); 
+            if (result && typeof result === 'string') {
+                setMessage(result);
+            }
         });
     };
 

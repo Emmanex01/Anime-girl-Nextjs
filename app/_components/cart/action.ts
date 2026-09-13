@@ -23,6 +23,7 @@ export async function addItem(
         ]);
         console.log('Cart after adding item:', cart);
         revalidateTag(TAGS.carts, 'max');
+        return { cart, message: 'Item added to cart' };
     } catch(error) {
         console.error('Error adding item to cart:', error);
         return "Error adding item to cart";

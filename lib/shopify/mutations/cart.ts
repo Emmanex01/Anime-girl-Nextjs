@@ -75,3 +75,22 @@ export const removeFromCartMutation = /* GraphQL */ `
     }
     ${cartFragment}
 `;
+
+export const cartBuyerIdentityUpdateMutation = /* GraphQL */ `
+    mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
+        cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
+            cart {
+                ...cart
+            }
+            userErrors {
+                field
+                message
+            }
+            warnings {
+                code
+                message
+            }
+        }
+    }
+    ${cartFragment}
+`;

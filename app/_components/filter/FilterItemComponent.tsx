@@ -1,65 +1,73 @@
-'use client'
-import Link from 'next/link';
-import { ListItem, PathFilterItem as PathFilterItemT } from './FilterList'
-import { createUrl } from '@/lib/utils';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { SortFilterItem } from '@/lib/constants';
+'use client';
+
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
+import { SortFilterItem } from "@/lib/constants";
+import { createUrl } from "@/lib/utils";
+import { ListItem, PathFilterItem as PathFilterItemT } from "./FilterList";
 
 function PathFilterItem({ item }: { item: PathFilterItemT }) {
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-    const active = pathname === item.path;
-    const newSearchParams = new URLSearchParams(searchParams.toString());
-    const DynamicTag = active ? 'p' : Link;
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const active = pathname === item.path;
+  const newSearchParams = new URLSearchParams(searchParams.toString());
+  newSearchParams.delete("q");
 
-    newSearchParams.delete('q');
-
-    return (
-        <li>
-            <DynamicTag
-                href={createUrl(item.path, newSearchParams)}
-                className={`block px-4 py-2 text-sm ${active ? 'font-bold' : ''}`}
-            >
-                {item.title}
-            </DynamicTag>
-        </li>
-    )
+  return (
+    <li>
+      {active ? (
+        <span className="flex items-center rounded-xl border border-neon-red/25 bg-neon-red/10 px-3 py-2 text-sm font-medium text-white">
+          {item.title}
+        </span>
+      ) : (
+        <Link
+          href={createUrl(item.path, newSearchParams)}
+          className="flex items-center rounded-xl border border-white/8 bg-white/[0.02] px-3 py-2 text-sm text-slate-300 transition hover:border-white/15 hover:bg-white/5 hover:text-white"
+        >
+          {item.title}
+        </Link>
+      )}
+    </li>
+  );
 }
 
 function SortFilterItemComponent({ item }: { item: SortFilterItem }) {
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-    const active = searchParams.get('sort') === item.slug;
-    const q = searchParams.get('q');
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const active = searchParams.get("sort") === item.slug;
+  const q = searchParams.get("q");
+  const newSearchParams = new URLSearchParams(searchParams.toString());
 
-    const href = createUrl(
-        pathname, 
-        new URLSearchParams({ 
-            ...(q && {q}),
-            ...(item.slug && item.slug.length && {sort: item.slug})
-             })
-    );
-    const DynamicTag = active ? 'p' : Link;
+  if (q) {
+    newSearchParams.set("q", q);
+  } else {
+    newSearchParams.delete("q");
+  }
 
-    return ( 
-        <li>
-            <DynamicTag
-                prefetch={!active ? false : undefined}
-                href={href}
-                className={`block px-4 py-2 text-sm ${active ? 'font-bold' : ''}`}
-            >
-                {item.title}
-            </DynamicTag>
-        </li>
-    )
-    }
+  if (item.slug) {
+    newSearchParams.set("sort", item.slug);
+  }
 
-const FilterItemComponent = ({item}: { item: ListItem}) => {
-  return 'path' in item ? (
-        <PathFilterItem item={item} /> 
-    ) : ( 
-        <SortFilterItemComponent item={item} /> 
-    );
+  return (
+    <li>
+      {active ? (
+        <span className="flex items-center rounded-xl border border-neon-red/25 bg-neon-red/10 px-3 py-2 text-sm font-medium text-white">
+          {item.title}
+        </span>
+      ) : (
+        <Link
+          href={createUrl(pathname, newSearchParams)}
+          className="flex items-center rounded-xl border border-white/8 bg-white/[0.02] px-3 py-2 text-sm text-slate-300 transition hover:border-white/15 hover:bg-white/5 hover:text-white"
+        >
+          {item.title}
+        </Link>
+      )}
+    </li>
+  );
 }
 
-export default FilterItemComponent
+const FilterItemComponent = ({ item }: { item: ListItem }) => {
+  return "path" in item ? <PathFilterItem item={item} /> : <SortFilterItemComponent item={item} />;
+};
+
+export default FilterItemComponent;

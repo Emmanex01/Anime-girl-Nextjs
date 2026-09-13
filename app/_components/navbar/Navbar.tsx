@@ -12,21 +12,24 @@ import { menu } from '@/lib/shopify/types';
 import SearchComponent from './Search';
 import { useCart } from '../cart/cart-context';
 
-const navLinks = [
-  { name: 'HOME' },
-  { name: 'NEW DROPS', hot: true },
-  { name: 'STREETWEAR' },
-  { name: 'FIGURES' },
-  { name: 'ACCESSORIES' },
-  { name: 'MYSTERY BOXES' },
-  { name: 'SALE', highlighted: true },
-];
+// const navLinks = [
+//   { name: 'HOME' },
+//   { name: 'NEW DROPS', hot: true },
+//   { name: 'STREETWEAR' },
+//   { name: 'FIGURES' },
+//   { name: 'ACCESSORIES' },
+//   { name: 'MYSTERY BOXES' },
+//   { name: 'SALE', highlighted: true },
+// ];
 
-export function Navbar({ navLinks }: { navLinks: menu[] }) {
+export function Navbar({ navLinks, accountMenu }: { navLinks: menu[], accountMenu: React.ReactNode }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchVal, setSearchVal] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLinkActive, setIsLinkActive] = useState<string>('Home');
+
+  
+  console.log(accountMenu);
 
   const {  
     wishlistCount, 
@@ -101,16 +104,6 @@ export function Navbar({ navLinks }: { navLinks: menu[] }) {
     setMobileMenuOpen(false);
   };
 
-  // const isLinkActive = (name: string) => {
-  //   if (name === 'HOME') return currentRoute === 'home';
-  //   if (name === 'NEW DROPS') return currentRoute === 'products' && searchFilter === 'NEW';
-  //   if (name === 'STREETWEAR') return currentRoute === 'products' && searchFilter === 'streetwear';
-  //   if (name === 'FIGURES') return currentRoute === 'products' && searchFilter === 'figure';
-  //   if (name === 'ACCESSORIES') return currentRoute === 'products' && searchFilter === 'accessories';
-  //   if (name === 'MYSTERY BOXES') return currentRoute === 'products' && searchFilter === 'replica';
-  //   if (name === 'SALE') return currentRoute === 'products' && searchFilter === 'SALE';
-  //   return false;
-  // };
 
   return (
     <nav
@@ -164,8 +157,8 @@ export function Navbar({ navLinks }: { navLinks: menu[] }) {
               <span className="text-[10px] font-bold tracking-widest uppercase">Wishlist</span>
               <span className="ml-1 text-neon-red font-bold text-[10px]">{wishlistCount}</span>
             </button>
-            <button 
-              onClick={() => setCurrentRoute('account')}
+            {/* <Link href="/account">
+              <button 
               className={`hidden md:flex items-center gap-2 cursor-pointer group hover:text-neon-blue transition-colors bg-transparent border-none outline-none font-bold ${
                 currentRoute === 'account' ? 'text-neon-blue' : 'text-white/60'
               }`}
@@ -175,15 +168,19 @@ export function Navbar({ navLinks }: { navLinks: menu[] }) {
                 {currentCustomer ? currentCustomer.name.split(' ')[0] : 'My Account'}
               </span>
             </button>
-            <button 
-              onClick={() => setCurrentRoute('admin')}
-              className={`hidden md:flex items-center gap-2 cursor-pointer group hover:text-neon-red transition-colors bg-transparent border-none outline-none font-bold ${
-                currentRoute === 'admin' ? 'text-neon-red' : 'text-white/60'
-              }`}
+            </Link> */}
+            {accountMenu}
+            <Link href="/admin">
+              <button 
+                onClick={() => setCurrentRoute('admin')}
+                className={`hidden md:flex items-center gap-2 cursor-pointer group hover:text-neon-red transition-colors bg-transparent border-none outline-none font-bold ${
+                  currentRoute === 'admin' ? 'text-neon-red' : 'text-white/60'
+                }`}
             >
               <User className="w-4 h-4 text-neon-red/60 group-hover:text-neon-red" />
               <span className="text-[10px] font-bold tracking-widest uppercase">Admin Portal</span>
             </button>
+            </Link>
             <button 
               onClick={() => {
                 console.log('cart button clicked');

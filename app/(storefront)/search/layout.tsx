@@ -1,21 +1,28 @@
-import Collections from "@/app/_components/Collections"
-import FilterList from "@/app/_components/filter/FilterList"
-import { sortOption } from "@/lib/constants"
+import Collections from "@/app/_components/Collections";
+import FilterList from "@/app/_components/filter/FilterList";
+import { ProductProvider } from "@/app/_components/product/product-context";
+import { sortOption } from "@/lib/constants";
 
-export default function SearchLayout({ 
-    children,
-}: { 
-    children: React.ReactNode 
-}) {
+export default function SearchLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto flex flex-col gap-8  px-4 md:flex-row py-8">
-        <div className=" md:max-w-31.25">
-            <Collections/>
+    <ProductProvider>
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="grid gap-6 xl:grid-cols-[240px_minmax(0,1fr)_220px]">
+            <aside className="xl:pt-2">
+            <div className="glass rounded-3xl border p-4 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+                <Collections />
+            </div>
+            </aside>
+
+            <main className="min-w-0">{children}</main>
+
+            <aside className="xl:pt-2">
+            <div className="glass rounded-3xl border p-4 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+                <FilterList list={sortOption} title="Sort by" />
+            </div>
+            </aside>
         </div>
-        <div className="">{children}</div>
-        <div className=" md:max-w-31.25 text-sm">
-            <FilterList list={sortOption} title="Sort by"/>
         </div>
-    </div>
-  )
+    </ProductProvider>
+  );
 }

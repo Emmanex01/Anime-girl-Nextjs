@@ -2,7 +2,7 @@
 import { Product } from "@/app/types";
 import { Cart, CartItem, ProductVariant } from "@/lib/shopify/types";
 import { number } from "motion";
-import { createContext, startTransition, use, useContext, useMemo, useOptimistic } from "react";
+import { createContext, startTransition, use, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 type updateType = 'plus' | 'minus' | 'delete';
 
@@ -10,11 +10,13 @@ type CartContextType = {
     cart : Cart | undefined;
     updateCartItem: (merchandiseId: string, updateType: updateType) => void;
     addCartItem: (variant: ProductVariant, product: Product) => void;
+    setCart: (cart: Cart) => void;
 }
 
 type CartAction =
     | { type: 'UPDATE_ITEM', payload: { merchandiseId: string; updateType: updateType}}
-    | { type: 'ADD_ITEM', payload: { variant: ProductVariant; product: Product}};
+    | { type: 'ADD_ITEM', payload: { variant: ProductVariant; product: Product}}
+    | { type: 'SET_CART', payload: Cart};
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -163,6 +165,9 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
                 lines: updatedLines
             }
         }
+        case 'SET_CART': {
+            return action.payload;
+        }
         default:
             return currentCart;
     }
@@ -176,40 +181,60 @@ export function CartProvider({
     cartPromise: Promise<Cart | undefined>;
 }) {
     const initialCart = use(cartPromise);
-    const [optimisticCart, updateOptimisticCart] = useOptimistic(
-        initialCart,
-        cartReducer
-    );
+    const [cartState, setCartState] = useState<Cart | undefined>(initialCart);
+    const ignoreServerCartSyncRef = useRef(false);
+
+    useEffect(() => {
+        if (ignoreServerCartSyncRef.current) {
+            return;
+        }
+
+        setCartState(initialCart);
+    }, [initialCart]);
+
+    const applyCartReducer = (nextAction: CartAction) => {
+        setCartState((currentCart) => cartReducer(currentCart, nextAction));
+    };
 
     const updateCartItem = (merchandiseId: string, updateType: updateType) => {
         console.log('Updating cart item:', merchandiseId, updateType);
+        ignoreServerCartSyncRef.current = true;
+
         startTransition(() => {
-            updateOptimisticCart({
+            applyCartReducer({
                 type: "UPDATE_ITEM",
-                payload: { merchandiseId, updateType}
+                payload: { merchandiseId, updateType }
             });
         });
     };
 
     const addCartItem = (variant: ProductVariant, product: Product) => {
+        ignoreServerCartSyncRef.current = true;
+
         startTransition(() => {
-            updateOptimisticCart({
+            applyCartReducer({
                 type: "ADD_ITEM",
-                payload: { variant, product}
+                payload: { variant, product }
             });
         });
     };
 
+    const setCart = (cart: Cart) => {
+        ignoreServerCartSyncRef.current = false;
+        setCartState(cart);
+    };
+
     const value = useMemo(
         () => ({
-            cart: optimisticCart,
+            cart: cartState,
             updateCartItem,
-            addCartItem
+            addCartItem,
+            setCart
         }),
-        [optimisticCart]
+        [cartState]
     )
 
-    console.log('CartProvider rendered with cart:', optimisticCart);
+    console.log('CartProvider rendered with cart:', cartState);
     console.log('CartProvider value:', value);
 
     return <CartContext.Provider value={value}>{children}</CartContext.Provider>

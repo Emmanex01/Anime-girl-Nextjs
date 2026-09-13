@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model OAuthState {
+  id           String   @id @default(cuid())
+  stateHash    String   @unique
+  codeVerifier String
+  nonce        String
+  returnTo     String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+model CustomerSession {
+  id           String   @id @default(cuid())
+  customerId   String?
+  accessToken  String
+  refreshToken String
+  idToken      String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([expiresAt])
+}
