@@ -6,10 +6,8 @@ const CLIENT_ID = process.env.SHOPIFY_CLIENT_ID!;
 
 const CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET!;
 
-const APP_URL = "localhost:3000";
-
 export function getCallbackUrl(): string {
-  return `https://bunt-rundown-zealous.ngrok-free.dev/auth/callback`;
+  return `https://anime-girl-nextjs.vercel.app/auth/callback`;
 }
 
 export async function getOpenIdConfiguration() {

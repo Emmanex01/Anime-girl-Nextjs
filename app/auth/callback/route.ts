@@ -35,7 +35,7 @@ import { cookies } from "next/headers";
 
 function getBaseUrl(request: Request) {
   if (process.env.APP_URL) {
-    return process.env.APP_URL.replace(/\/$/, "");
+    return process.env.APP_URL;
   }
 
   const host =
