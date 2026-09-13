@@ -58,7 +58,7 @@ export async function GET(
 
   logoutUrl.searchParams.set(
     "post_logout_redirect_uri",
-    process.env.NEXT_PUBLIC_APP_URL!,
+    process.env.APP_URL!,
   );
 
   return NextResponse.redirect(

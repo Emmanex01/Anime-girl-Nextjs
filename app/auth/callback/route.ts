@@ -11,25 +11,44 @@ import {
 import { updateCartBuyerIdentity } from "@/lib/shopify";
 import { cookies } from "next/headers";
 
+// function getBaseUrl(request: Request) {
+//   // If you define an APP_URL in your .env (e.g. your ngrok domain), use it
+//   if (process.env.NEXT_PUBLIC_APP_URL) {
+//     return process.env.NEXT_PUBLIC_APP_URL;
+//   }
+
+//   const host =
+//     request.headers.get("x-forwarded-host") ||
+//     request.headers.get("host") ||
+//     "localhost:3000";
+
+//   // If running on localhost, use http:// unless forwarded otherwise
+//   if (host.includes("localhost") || host.includes("127.0.0.1")) {
+//     const proto = request.headers.get("x-forwarded-proto") || "http";
+//     return `${proto}://${host}`;
+//   }
+  
+
+//   const proto = request.headers.get("x-forwarded-proto") || "https";
+//   return `${proto}://${host}`;
+// }
+
 function getBaseUrl(request: Request) {
-  // If you define an APP_URL in your .env (e.g. your ngrok domain), use it
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
+  if (process.env.APP_URL) {
+    return process.env.APP_URL.replace(/\/$/, "");
   }
 
   const host =
     request.headers.get("x-forwarded-host") ||
-    request.headers.get("host") ||
-    "localhost:3000";
+    request.headers.get("host");
 
-  // If running on localhost, use http:// unless forwarded otherwise
-  if (host.includes("localhost") || host.includes("127.0.0.1")) {
-    const proto = request.headers.get("x-forwarded-proto") || "http";
-    return `${proto}://${host}`;
+  const proto =
+    request.headers.get("x-forwarded-proto") || "https";
+
+  if (!host) {
+    throw new Error("Unable to determine application URL");
   }
-  
 
-  const proto = request.headers.get("x-forwarded-proto") || "https";
   return `${proto}://${host}`;
 }
 
