@@ -32,9 +32,9 @@ const mainPromos = [
 
 export function PromoBanners() {
   return (
-    <section className="py-12 bg-background">
+    <section className="w-full max-w-full overflow-hidden py-12 bg-background">
       <div className="max-w-[1600px] mx-auto px-4 md:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {mainPromos.map((promo, i) => (
             <motion.div
               key={promo.title}

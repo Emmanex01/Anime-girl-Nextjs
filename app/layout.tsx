@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Footer } from "./_components/Footer";
 import NavbarWrapper from "./_components/navbar/NavbarWrapper";
@@ -8,6 +9,17 @@ import CartDrawerWrapper from "./_components/CartDrawerWrapper";
 import { cookies } from "next/headers";
 import { CartProvider } from "./_components/cart/cart-context";
 import { getCart } from "@/lib/shopify";
+
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "Anime Shop",
@@ -29,7 +41,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full antialiased"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-screen bg-background text-white selection:bg-neon-red/30">
       <CartProvider cartPromise={cart}>

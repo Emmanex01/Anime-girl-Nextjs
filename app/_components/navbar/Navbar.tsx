@@ -157,29 +157,18 @@ export function Navbar({ navLinks, accountMenu }: { navLinks: menu[], accountMen
               <span className="text-[10px] font-bold tracking-widest uppercase">Wishlist</span>
               <span className="ml-1 text-neon-red font-bold text-[10px]">{wishlistCount}</span>
             </button>
-            {/* <Link href="/account">
-              <button 
-              className={`hidden md:flex items-center gap-2 cursor-pointer group hover:text-neon-blue transition-colors bg-transparent border-none outline-none font-bold ${
-                currentRoute === 'account' ? 'text-neon-blue' : 'text-white/60'
+            {accountMenu}
+            <Link
+              href="/admin"
+              onClick={() => setCurrentRoute('admin')}
+              className={`hidden md:flex items-center gap-2 cursor-pointer group hover:text-neon-red transition-colors ${
+                currentRoute === 'admin' ? 'text-neon-red' : 'text-white/60'
               }`}
             >
-              <User className={`w-4 h-4 ${currentCustomer ? 'text-neon-blue animate-pulse' : 'text-white/40'}`} />
-              <span className="text-[10px] font-bold tracking-widest uppercase">
-                {currentCustomer ? currentCustomer.name.split(' ')[0] : 'My Account'}
-              </span>
-            </button>
-            </Link> */}
-            {accountMenu}
-            <Link href="/admin">
-              <button 
-                onClick={() => setCurrentRoute('admin')}
-                className={`hidden md:flex items-center gap-2 cursor-pointer group hover:text-neon-red transition-colors bg-transparent border-none outline-none font-bold ${
-                  currentRoute === 'admin' ? 'text-neon-red' : 'text-white/60'
-                }`}
-            >
               <User className="w-4 h-4 text-neon-red/60 group-hover:text-neon-red" />
-              <span className="text-[10px] font-bold tracking-widest uppercase">Admin Portal</span>
-            </button>
+              <span className="text-[10px] font-bold tracking-widest uppercase">
+                Admin Portal
+              </span>
             </Link>
             <button 
               onClick={() => {
@@ -231,7 +220,7 @@ export function Navbar({ navLinks, accountMenu }: { navLinks: menu[], accountMen
       {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <MobileMenu navLinks={navLinks} />
+          <MobileMenu navLinks={navLinks} accountMenu={accountMenu} />
         )}
       </AnimatePresence>
     </nav>

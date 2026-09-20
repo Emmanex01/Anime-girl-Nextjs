@@ -5,7 +5,7 @@ import { getMenu } from '@/lib/shopify';
 const NavbarWrapper = async () => {
     const navLinks = await getMenu("main-menu");
   return (
-    <div>
+    <div className="bg-yellow-300">
       <Navbar navLinks={navLinks} accountMenu={<AccountMenuServer />} />
     </div>
   )

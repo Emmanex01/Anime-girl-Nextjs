@@ -9,7 +9,7 @@ import { Newsletter } from "./_components/Newsletter";
 
 export default function Home() {
   return (
-    <div className="bg-background">
+    <div className="relative w-full min-w-0 overflow-x-hidden">
       <Hero/>
       <TrustBadges/>
       <TrendingProducts/>

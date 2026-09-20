@@ -11,7 +11,7 @@ import { menu } from '@/lib/shopify/types';
 import Link from 'next/link';
 import { useShopifyProductSearch } from '@/lib/hooks/useShopifyProducts';
 
-const MobileMenu = ({ navLinks }: { navLinks: menu[] }) => {
+const MobileMenu = ({ navLinks, accountMenu }: { navLinks: menu[], accountMenu: React.ReactNode }) => {
     const [query, setQuery] = useState('');
     const [showMobileDropdown, setShowMobileDropdown] = useState(false);
     const [isLinkActive, setIsLinkActive] = useState<string>('Home');
@@ -127,12 +127,7 @@ const MobileMenu = ({ navLinks }: { navLinks: menu[] }) => {
                     <span className="text-sm font-bold uppercase tracking-widest">Wishlist</span>
                     <span className="ml-1 text-neon-red font-bold text-xs">({wishlistCount})</span>
                   </div>
-                  <div className="flex items-center gap-3 text-white/60 cursor-pointer" onClick={() => { setCurrentRoute('account'); setMobileMenuOpen(false); }}>
-                    <User className={`w-5 h-5 cursor-pointer ${currentCustomer ? 'text-neon-blue' : 'text-white/40'}`} />
-                    <span className="text-sm font-bold uppercase tracking-widest">
-                      {currentCustomer ? currentCustomer.name.split(' ')[0] : 'Account'}
-                    </span>
-                  </div>
+                  {accountMenu}
                   <div className="flex items-center gap-3 text-white/60 cursor-pointer" onClick={() => { setCurrentRoute('admin'); setMobileMenuOpen(false); }}>
                     <User className="w-5 h-5 text-neon-red cursor-pointer" />
                     <span className="text-sm font-bold uppercase tracking-widest">Admin</span>
