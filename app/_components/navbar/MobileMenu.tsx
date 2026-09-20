@@ -20,19 +20,13 @@ const MobileMenu = ({ navLinks, accountMenu }: { navLinks: menu[], accountMenu: 
     const { shopifyProducts, isLoading, error } = useShopifyProductSearch({query}); // Fetch products based on query
 
 
-    const { 
-        cartCount, 
-        wishlistCount, 
-        setCartOpen, 
+    const {  
+        wishlistCount,  
         setWishlistOpen,
-        isMobileMenuOpen,
         setMobileMenuOpen,
-        currentRoute,
         setCurrentRoute,
         setSearchFilter,
         setCategoryFilter,
-        searchFilter,
-        currentCustomer
       } = useShopStore();
 
       const handleIsActiveLink = (title: string) => {

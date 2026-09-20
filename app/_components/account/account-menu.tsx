@@ -51,7 +51,7 @@ export default function AccountMenu({
   return (
     <div
       ref={containerRef}
-      className="relative hidden md:block"
+      className="relative md:block"
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
     >
